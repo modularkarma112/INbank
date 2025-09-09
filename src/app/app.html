@@ -1,1 +1,44 @@
+<div class="login-container">
+  <div class="header">
+    <div class="bank-icon">
+      <img src="logo.png" alt="Logo del Banco">
+    </div>
+    <h1>INGBANK</h1>
+    <p>Panel de gestión</p>
+  </div>
+
+  <div class="login-panel">
+    <h2>INICIAR SESIÓN</h2>
+    <p class="subtitle">Ingrese sus credenciales de ejecutivo para acceder al sistema</p>
+
+    <form (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="username"
+          placeholder="Usuario"
+          required>
+        <span class="input-icon">👤</span>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Contraseña"
+          required>
+        <span class="input-icon">🔒</span>
+      </div>
+
+      <button type="submit" class="login-btn">Acceder al sistema</button>
+    </form>
+
+    <p class="security-note">Sistema seguro para ejecutivos bancarios</p>
+  </div>
+</div>
+
 <router-outlet />

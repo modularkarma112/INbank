@@ -1,0 +1,250 @@
+/*
+===============================================
+CONFIGURACIÓN GLOBAL DE FUENTES
+===============================================
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /* FUENTE BASE DEL PROYECTO: Inter como principal, con fallbacks */
+  font-family: Inter, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+/*
+===============================================
+CONTENEDOR PRINCIPAL DE LOGIN - SIN FUENTE ESPECÍFICA
+===============================================
+*/
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-image: url('assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+===============================================
+HEADER - LOGO Y TÍTULO DEL BANCO
+===============================================
+*/
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  z-index: 1;
+  position: relative;
+}
+
+.bank-icon {
+  /* CONTENEDOR DEL LOGO: Círculo blanco con sombra */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+
+}
+
+.bank-icon img {
+
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+
+.header h1 {
+  /* TÍTULO PRINCIPAL "Banco": Inter Bold 2rem */
+  color: rgb(0, 0, 0);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+}
+
+.header p {
+  /* SUBTÍTULO "Panel de gestión": Inter Light 0.9rem */
+  color: rgba(35, 35, 35, 0.9);
+  font-size: 0.9rem;
+  font-weight: 300;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+}
+
+/*
+===============================================
+PANEL DE LOGIN - FORMULARIO PRINCIPAL
+===============================================
+*/
+.login-panel {
+  background: rgba(240, 242, 247, 0.75);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 45px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  z-index: 1;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.login-panel h2 {
+  /* TÍTULO DEL FORMULARIO "INICIAR SESIÓN": Inter SemiBold 1.5rem */
+  color: #1d1d1d;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+}
+
+.subtitle {
+  /* DESCRIPCIÓN DEL FORMULARIO: Inter Regular 0.85rem */
+  color: #3e3e3e;
+  font-size: 0.85rem;
+  margin-bottom: 30px;
+  line-height: 1.4;
+  text-align: left;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+  font-weight: 400;
+}
+
+/*
+===============================================
+CAMPOS DE ENTRADA (INPUTS)
+===============================================
+*/
+.form-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.form-group input {
+  /* CAMPOS DE TEXTO: Inter Regular 1rem */
+  width: 100%;
+  padding: 16px 45px 16px 18px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+  font-weight: 400;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #2196F3;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.08);
+}
+
+.form-group input::placeholder {
+  /* PLACEHOLDERS: Inter Regular 1rem con color gris */
+  color: #4e4e4e;
+  font-weight: 400;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+}
+
+.input-icon {
+  /* ICONOS DE LOS INPUTS: Emojis con font-size */
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0BA5FF;
+  font-size: 1rem;
+}
+
+/*
+===============================================
+BOTÓN DE LOGIN
+===============================================
+*/
+.login-btn {
+  /* BOTÓN PRINCIPAL: Inter SemiBold 1rem MAYÚSCULAS */
+  width: 100%;
+  background: #0BA5FF;
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+/*
+===============================================
+NOTA DE SEGURIDAD
+===============================================
+*/
+.security-note {
+  /* NOTA DE SEGURIDAD: Inter Italic 0.78rem */
+  color: #4A4A4A;
+  font-size: 0.78rem;
+  margin-top: 15px;
+  font-style: italic;
+  font-family: Inter, system-ui, sans-serif; /* Explícito para claridad */
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/*
+===============================================
+RESPONSIVE DESIGN
+===============================================
+*/
+@media (max-width: 480px) {
+  .login-panel {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .header h1 {
+    /* TÍTULO RESPONSIVE: Inter Bold 1.7rem */
+    font-size: 1.7rem;
+  }
+
+  .bank-icon {
+    /* CONTENEDOR RESPONSIVE: Más pequeño para móviles */
+    width: 60px;
+    height: 60px;
+  }
+
+  .bank-icon img {
+    /* LOGO RESPONSIVE: Ajustado para móviles */
+    width: 35px;
+    height: 35px;
+  }
+}
