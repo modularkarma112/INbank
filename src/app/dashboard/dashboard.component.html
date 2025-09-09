@@ -1,0 +1,69 @@
+<header class="topbar d-flex align-items-center">
+	<div class="brand" (click)="toggleMenu()" (keydown)="onBrandKeydown($event)" role="button" tabindex="0" aria-haspopup="true" [attr.aria-expanded]="menuOpen()">
+		<div class="logo">🏛️</div>
+		<div class="titles">
+			<div class="name">Banco</div>
+			<div class="subtitle">Panel de gestión</div>
+		</div>
+	</div>
+	<div class="actions ms-auto">
+		<a routerLink="/" class="btn-primary">Cerrar Sesión</a>
+	</div>
+	<nav class="mega" [class.open]="menuOpen()" aria-label="Menú principal">
+		@for (sec of sections; track sec.title; let i = $index) {
+			<div class="mega-section">
+				<button class="mega-title" (click)="toggleSection(i)" (keydown.enter)="toggleSection(i)" (keydown.space)="$event.preventDefault(); toggleSection(i)" [attr.aria-expanded]="sec.open">
+					<span>{{ sec.title }}</span>
+					<span class="chev" [class.rot]="sec.open">▾</span>
+				</button>
+				<ul [class.hide]="!sec.open">
+					@for (it of sec.items; track it.label) {
+						<li><a [routerLink]="it.link">{{ it.label }}</a></li>
+					}
+				</ul>
+			</div>
+		}
+	</nav>
+	<div class="mega-backdrop" (click)="toggleMenu()" [class.show]="menuOpen()"></div>
+</header>
+
+<main class="container">
+	<h1>Dashboard Ejecutivo</h1>
+	<p class="hint">Seleccione la operación que desea realizar</p>
+
+	<section class="cards">
+		<article class="card">
+			<div class="card-icon green">👤</div>
+			<div class="card-title">Abrir Cuenta</div>
+			<p>Procesar solicitud de apertura de nueva cuenta bancaria</p>
+			<a routerLink="/abrir-cuenta" class="btn-outline">Acceder</a>
+		</article>
+
+		<article class="card">
+			<div class="card-icon pink">👥</div>
+			<div class="card-title">Cancelar Cuenta</div>
+			<p>Gestionar proceso de cierre y cancelación de cuenta</p>
+			<a routerLink="/cancelar-cuenta" class="btn-outline">Acceder</a>
+		</article>
+
+		<article class="card">
+			<div class="card-icon blue">💲</div>
+			<div class="card-title">Préstamos</div>
+			<p>Evaluar y procesar solicitudes de crédito y préstamos</p>
+			<a routerLink="/prestamos" class="btn-outline">Acceder</a>
+		</article>
+	</section>
+
+	<section class="stats">
+		@for (s of stats; track s.label) {
+			<div class="stat">
+				<div class="stat-top">
+					<div class="label">{{ s.label }}</div>
+					<div class="chip" [class.green]="s.tone==='green'" [class.blue]="s.tone==='blue'" [class.red]="s.tone==='red'">{{ s.tone==='blue' ? '💲' : (s.tone==='red' ? '⚠️' : '👤') }}</div>
+				</div>
+				<div class="value">{{ s.value }}</div>
+			</div>
+		}
+	</section>
+</main>
+
