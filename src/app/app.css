@@ -230,21 +230,32 @@ RESPONSIVE DESIGN
     padding: 30px 20px;
     margin: 20px;
   }
-
+  
   .header h1 {
     /* TÍTULO RESPONSIVE: Inter Bold 1.7rem */
     font-size: 1.7rem;
   }
-
+  
   .bank-icon {
     /* CONTENEDOR RESPONSIVE: Más pequeño para móviles */
     width: 60px;
     height: 60px;
   }
-
+  
   .bank-icon img {
     /* LOGO RESPONSIVE: Ajustado para móviles */
     width: 35px;
     height: 35px;
   }
+}
+
+/*
+===============================================
+CONTENEDOR DEL DASHBOARD
+===============================================
+*/
+.dashboard-container {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7fa;
 }

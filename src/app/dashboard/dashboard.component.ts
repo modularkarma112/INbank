@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
 	selector: 'app-dashboard',
@@ -11,6 +12,8 @@ import { RouterLink } from '@angular/router';
 })
 export class DashboardComponent {
 	menuOpen = signal(false)
+
+	constructor(private authService: AuthService) {}
 	sections = [
 		{ title: 'Clientes & Cuentas', open: false, items: [
 			{ label: 'Clientes', link: '/clientes' },
@@ -48,6 +51,11 @@ export class DashboardComponent {
 	onBrandKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.toggleMenu() }
 		else if (e.key === 'Escape' && this.menuOpen()) { this.menuOpen.set(false) }
+	}
+
+	// Método para cerrar sesión
+	onLogout() {
+		this.authService.logout();
 	}
 }
 

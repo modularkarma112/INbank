@@ -1,4 +1,5 @@
-<div class="login-container">
+<!-- LOGIN SCREEN - Solo visible cuando no está logueado -->
+<div class="login-container" *ngIf="!isLoggedIn">
   <div class="header">
     <div class="bank-icon">
       <img src="logo.png" alt="Logo del Banco">
@@ -41,4 +42,7 @@
   </div>
 </div>
 
-<router-outlet />
+<!-- DASHBOARD - Solo visible cuando está logueado -->
+<div class="dashboard-container" *ngIf="isLoggedIn">
+  <router-outlet />
+</div>
