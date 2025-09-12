@@ -42,9 +42,10 @@ export class DashboardComponent {
 		]}
 	]
 	stats = [
-		{ label: 'Cuentas Procesadas Hoy', value: 24, tone: 'green' },
-		{ label: 'Préstamos Pendientes', value: 5, tone: 'blue' },
-		{ label: 'Cancelaciones Mes', value: 12, tone: 'red' }
+		{ label: 'Cuentas Abiertas Hoy', value: 32, tone: 'green' },
+		{ label: 'Créditos por Aprobar', value: 8, tone: 'blue' },
+		{ label: 'Monto en Préstamos (MXN)', value: '2.5M', tone: 'blue' },
+		{ label: 'Cancelaciones del Mes', value: 7, tone: 'red' }
 	]
 	toggleMenu() { this.menuOpen.set(!this.menuOpen()) }
 	toggleSection(i: number) { this.sections[i].open = !this.sections[i].open }

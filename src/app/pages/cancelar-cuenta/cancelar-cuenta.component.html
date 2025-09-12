@@ -1,0 +1,223 @@
+<div class="cancel-account-container">
+  <!-- Header -->
+  <div class="form-header">
+    <button class="back-button" (click)="goBack()">
+      ←
+    </button>
+    <div class="header-content">
+      <div class="header-icon">⊖</div>
+      <div>
+        <h1>Cancelar Cuenta</h1>
+        <p>Proceso de cierre bancario</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de cancelación -->
+  <div class="cancel-form">
+    <div class="warning-banner">
+      <div class="warning-icon">⚠️</div>
+      <div class="warning-text">Esta acción es irreversible. Asegúrate de transferir todos los fondos antes de continuar.</div>
+    </div>
+
+    <form [formGroup]="cancelForm" (ngSubmit)="onSubmit()">
+      <!-- Datos para Cierre de Cuenta -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">👤</div>
+          <h2>Datos para Cierre de Cuenta</h2>
+        </div>
+        <p class="section-description">Complete la información requerida para procesar el cierre de cuenta</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="accountNumber">Número de Cuenta *</label>
+            <input 
+              type="text" 
+              id="accountNumber" 
+              formControlName="accountNumber"
+              placeholder="1234567890984"
+              [class.error]="cancelForm.get('accountNumber')?.invalid && cancelForm.get('accountNumber')?.touched">
+            <div class="error-message" *ngIf="getFieldError('accountNumber')">
+              {{ getFieldError('accountNumber') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rfc">RFC *</label>
+            <input 
+              type="text" 
+              id="rfc" 
+              formControlName="rfc"
+              placeholder="ABCD123456EFG"
+              [class.error]="cancelForm.get('rfc')?.invalid && cancelForm.get('rfc')?.touched">
+            <div class="error-message" *ngIf="getFieldError('rfc')">
+              {{ getFieldError('rfc') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="curp">CURP *</label>
+            <input 
+              type="text" 
+              id="curp" 
+              formControlName="curp"
+              placeholder="ABCD123456HDFRML09"
+              [class.error]="cancelForm.get('curp')?.invalid && cancelForm.get('curp')?.touched">
+            <div class="error-message" *ngIf="getFieldError('curp')">
+              {{ getFieldError('curp') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Nombres *</label>
+            <input 
+              type="text" 
+              id="firstName" 
+              formControlName="firstName"
+              placeholder="Nombres del titular"
+              [class.error]="cancelForm.get('firstName')?.invalid && cancelForm.get('firstName')?.touched">
+            <div class="error-message" *ngIf="getFieldError('firstName')">
+              {{ getFieldError('firstName') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="lastName">Apellidos *</label>
+            <input 
+              type="text" 
+              id="lastName" 
+              formControlName="lastName"
+              placeholder="Apellidos del titular"
+              [class.error]="cancelForm.get('lastName')?.invalid && cancelForm.get('lastName')?.touched">
+            <div class="error-message" *ngIf="getFieldError('lastName')">
+              {{ getFieldError('lastName') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Correo Electrónico *</label>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email"
+              placeholder="cliente@gmail.com"
+              [class.error]="cancelForm.get('email')?.invalid && cancelForm.get('email')?.touched">
+            <div class="error-message" *ngIf="getFieldError('email')">
+              {{ getFieldError('email') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Teléfono *</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              formControlName="phone"
+              placeholder="55 1234 5678"
+              [class.error]="cancelForm.get('phone')?.invalid && cancelForm.get('phone')?.touched">
+            <div class="error-message" *ngIf="getFieldError('phone')">
+              {{ getFieldError('phone') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivo de cierre -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">❓</div>
+          <h2>Motivo de cierre</h2>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="closeReason">Motivo principal *</label>
+            <select 
+              id="closeReason" 
+              formControlName="closeReason"
+              [class.error]="cancelForm.get('closeReason')?.invalid && cancelForm.get('closeReason')?.touched">
+              <option value="">Seleccione el motivo de cierre</option>
+              <option *ngFor="let reason of closeReasons" [value]="reason.value">
+                {{ reason.label }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="getFieldError('closeReason')">
+              {{ getFieldError('closeReason') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transferencia de Saldo Restante -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">💸</div>
+          <h2>Transferencia de Saldo Restante</h2>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="transferAccount">Cuenta de Transferencia</label>
+            <input 
+              type="text" 
+              id="transferAccount" 
+              formControlName="transferAccount"
+              placeholder="Número de cuenta de destino">
+          </div>
+          
+          <div class="form-group">
+            <label for="destinationBank">Banco de destino</label>
+            <select 
+              id="destinationBank" 
+              formControlName="destinationBank">
+              <option value="">Seleccione el banco de destino</option>
+              <option *ngFor="let banco of bancosMexicanos" [value]="banco">
+                {{ banco }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmación Requerida -->
+      <div class="confirmation-section">
+        <h3>Confirmación Requerida:</h3>
+        <div class="confirmation-checkbox">
+          <input 
+            type="checkbox" 
+            id="confirmIrreversible" 
+            formControlName="confirmIrreversible">
+          <label for="confirmIrreversible">
+            Entiendo que el cierre de cuenta es irreversible
+          </label>
+        </div>
+        <div class="error-message" *ngIf="getFieldError('confirmIrreversible')">
+          {{ getFieldError('confirmIrreversible') }}
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="onCancel()">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn-submit" 
+          [disabled]="!isFormComplete() || isSubmitting()">
+          <span *ngIf="!isSubmitting()">Procesar Cierre</span>
+          <span *ngIf="isSubmitting()" class="loading">
+            ⏳ Procesando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

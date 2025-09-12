@@ -1,0 +1,284 @@
+<div class="open-account-container">
+  <div class="form-header">
+    <button class="back-button" (click)="goBack()">
+      ←
+    </button>
+    <div class="header-content">
+      <div class="header-icon">
+        👤
+      </div>
+      <div>
+        <h1>Abrir Nueva Cuenta</h1>
+        <p>Formulario de apertura bancaria ejecutiva</p>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="account-form">
+
+    <!-- Datos del Cliente -->
+    <section class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          👤
+        </div>
+        <h2>Datos del Cliente</h2>
+      </div>
+      <p class="section-description">Complete todos los campos requeridos para procesar la apertura de cuenta</p>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Nombres*</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="Ingresa tu nombre"
+            [class.error]="getFieldError('firstName')"
+          >
+          <span class="error-message" *ngIf="getFieldError('firstName')">
+            {{ getFieldError('firstName') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Apellidos*</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Ingresa tus apellidos"
+            [class.error]="getFieldError('lastName')"
+          >
+          <span class="error-message" *ngIf="getFieldError('lastName')">
+            {{ getFieldError('lastName') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rfc">RFC*</label>
+          <input
+            id="rfc"
+            type="text"
+            formControlName="rfc"
+            placeholder="ABCD123456EFG"
+            [class.error]="getFieldError('rfc')"
+          >
+          <span class="error-message" *ngIf="getFieldError('rfc')">
+            {{ getFieldError('rfc') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="curp">CURP*</label>
+          <input
+            id="curp"
+            type="text"
+            formControlName="curp"
+            placeholder="ABCD123456HDFRML09"
+            [class.error]="getFieldError('curp')"
+          >
+          <span class="error-message" *ngIf="getFieldError('curp')">
+            {{ getFieldError('curp') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Correo Electrónico*</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="correo@gmail.com"
+            [class.error]="getFieldError('email')"
+          >
+          <span class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Teléfono*</label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            placeholder="55 1234 5678"
+            [class.error]="getFieldError('phone')"
+          >
+          <span class="error-message" *ngIf="getFieldError('phone')">
+            {{ getFieldError('phone') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado*</label>
+          <select
+            id="estado"
+            formControlName="estado"
+            (change)="onEstadoChange($event.target.value)"
+            [class.error]="getFieldError('estado')"
+          >
+            <option value="">Selecciona tu estado</option>
+            <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('estado')">
+            {{ getFieldError('estado') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">Ciudad*</label>
+          <select
+            id="city"
+            formControlName="city"
+            [disabled]="!accountForm.get('estado')?.value"
+            [class.error]="getFieldError('city')"
+          >
+            <option value="">{{!accountForm.get('estado')?.value ? 'Primero selecciona un estado' : 'Selecciona tu ciudad'}}</option>
+            <option *ngFor="let city of ciudadesDisponibles" [value]="city">{{ city }}</option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('city')">
+            {{ getFieldError('city') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="address">Dirección completa*</label>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            placeholder="Calle, número, colonia"
+            [class.error]="getFieldError('address')"
+          >
+          <span class="error-message" *ngIf="getFieldError('address')">
+            {{ getFieldError('address') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="postalCode">Código Postal*</label>
+          <input
+            id="postalCode"
+            type="text"
+            formControlName="postalCode"
+            placeholder="12345"
+            [class.error]="getFieldError('postalCode')"
+          >
+          <span class="error-message" *ngIf="getFieldError('postalCode')">
+            {{ getFieldError('postalCode') }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Información Financiera -->
+    <section class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          💼
+        </div>
+        <h2>Información Financiera</h2>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="occupation">Ocupación*</label>
+          <select
+            id="occupation"
+            formControlName="occupation"
+            [class.error]="getFieldError('occupation')"
+          >
+            <option value="">Profesión u ocupación</option>
+            <option *ngFor="let occupation of occupations" [value]="occupation">{{ occupation }}</option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('occupation')">
+            {{ getFieldError('occupation') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="monthlyIncome">Ingresos mensuales* (MXN)</label>
+          <input
+            id="monthlyIncome"
+            type="number"
+            formControlName="monthlyIncome"
+            placeholder="15000"
+            [class.error]="getFieldError('monthlyIncome')"
+          >
+          <span class="error-message" *ngIf="getFieldError('monthlyIncome')">
+            {{ getFieldError('monthlyIncome') }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detalles de la cuenta -->
+    <section class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          💳
+        </div>
+        <h2>Detalles de la cuenta</h2>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="accountType">Tipo de cuenta*</label>
+          <select
+            id="accountType"
+            formControlName="accountType"
+            [class.error]="getFieldError('accountType')"
+          >
+            <option value="">Selecciona el tipo de cuenta</option>
+            <option *ngFor="let type of accountTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+          <span class="error-message" *ngIf="getFieldError('accountType')">
+            {{ getFieldError('accountType') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="initialDeposit">Depósito inicial* (MXN)</label>
+          <input
+            id="initialDeposit"
+            type="number"
+            formControlName="initialDeposit"
+            placeholder="500"
+            [class.error]="getFieldError('initialDeposit')"
+          >
+          <span class="error-message" *ngIf="getFieldError('initialDeposit')">
+            {{ getFieldError('initialDeposit') }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botones de acción -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="accountForm.invalid || isSubmitting()"
+      >
+        <span *ngIf="!isSubmitting()">Crear Cuenta</span>
+        <span *ngIf="isSubmitting()" class="loading">
+          Procesando...
+        </span>
+      </button>
+    </div>
+
+  </form>
+</div>
