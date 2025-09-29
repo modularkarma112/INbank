@@ -57,6 +57,73 @@
 
 ## Desarrollo
 
+### Configuración de Base de Datos
+
+Variables en `.env` (ejemplo para local):
+
+```
+PORT=4000
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=INGBANK
+JWT_SECRET=dev_secret
+JWT_EXPIRES_IN=2h
+```
+
+Para usar un servidor remoto cambia `DB_HOST`, `DB_USER` y `DB_PASSWORD` y asegúrate que el usuario tenga los privilegios:
+
+```sql
+CREATE USER 'inbank'@'%' IDENTIFIED BY 'TuPasswordSeguro';
+GRANT ALL PRIVILEGES ON INGBANK.* TO 'inbank'@'%';
+FLUSH PRIVILEGES;
+```
+
+Luego ajusta en `.env`:
+
+```
+DB_USER=inbank
+DB_PASSWORD=TuPasswordSeguro
+```
+
+### Usuario admin (semilla)
+
+Ejecuta una sola vez para crear el usuario administrador (admin / admin123):
+
+```powershell
+npm run seed:api
+```
+
+### Ejecutar API en desarrollo
+
+```powershell
+npm run dev:api
+```
+
+Endpoint de salud: `GET http://localhost:4000/health`
+
+### Endpoints principales
+
+- Auth: `POST /api/auth/login` { usuario, contrasena }
+- Clientes: GET/POST `/api/clientes`, validaciones `/api/clientes/existe`, búsqueda `/api/clientes/buscar`
+- Tipos de cuenta: GET/POST/PUT/DELETE `/api/tipos-cuenta`
+- Cuentas: creación `POST /api/cuentas`, depósitos, retiros, transferencias, cancelación, transacciones
+- Préstamos: GET/POST `/api/prestamos`, actualizar estatus `/api/prestamos/:id/estatus`
+
+Todas (excepto login y health) requieren header `Authorization: Bearer <token>`.
+
+### Notas de integridad
+
+Se añadieron índices y restricciones únicas:
+
+- `cuentas.numero_cuenta` UNIQUE
+- `usuarios.usuario` UNIQUE y `usuarios.correo` UNIQUE
+- Índices sobre rfc/curp/email/telefono en clientes
+
+La creación de cuenta reintenta hasta 5 veces si hay colisión de número.
+
+
 Desarrollo:
 
 ```powershell

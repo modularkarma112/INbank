@@ -14,42 +14,31 @@ import { AuthService } from './auth.service';
 export class App {
   protected readonly title = signal('INBANK');
 
-  // Propiedades para el formulario de login
   username: string = '';
   password: string = '';
 
   constructor(private router: Router, private authService: AuthService) {}
 
-  // Getter para el estado de login
   get isLoggedIn(): boolean {
     return this.authService.isAuthenticated();
   }
 
-  // Método para manejar el login
-  onLogin() {
-    if (this.username && this.password) {
-      console.log('Login attempt:', {
-        username: this.username,
-        password: this.password
-      });
-      
-      // Usar el servicio de autenticación
-      const success = this.authService.login(this.username, this.password);
-      
-      if (success) {
-        // Limpiar formulario después del login exitoso
-        this.username = '';
-        this.password = '';
-      }
-    } else {
+  async onLogin() {
+    if (!this.username || !this.password) {
       alert('Por favor, completa todos los campos');
+      return;
+    }
+    try {
+      await this.authService.loginApi(this.username, this.password);
+      this.username = '';
+      this.password = '';
+    } catch (e: any) {
+      alert(e?.message || 'Credenciales inválidas');
     }
   }
 
-  // Método para cerrar sesión (usado desde el dashboard)
   onLogout() {
     this.authService.logout();
-    // Limpiar formulario
     this.username = '';
     this.password = '';
   }

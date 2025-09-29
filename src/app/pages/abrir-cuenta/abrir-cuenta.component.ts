@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
 	selector: 'app-abrir-cuenta',
@@ -113,7 +114,7 @@ export class AbrirCuentaComponent {
     { value: 'basica', label: 'Cuenta Básica Sin Comisiones' }
   ];
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
     this.accountForm = this.fb.group({
       // Datos del Cliente
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -142,14 +143,49 @@ export class AbrirCuentaComponent {
       this.isSubmitting.set(true);
 
       const formData = this.accountForm.value;
-      console.log('Datos del formulario:', formData);
+      const payload = {
+        nombres: formData.firstName,
+        apellido_paterno: (formData.lastName || '').split(' ')[0] || '',
+        apellido_materno: (formData.lastName || '').split(' ')[1] || '',
+        rfc: formData.rfc,
+        curp: formData.curp,
+        email: formData.email,
+        telefono: (formData.phone || '').replace(/\D/g, '').slice(-10),
+        estado: formData.estado,
+        ciudad: formData.city,
+        direccion: formData.address,
+        ingresos_mensuales: formData.monthlyIncome
+      };
 
-      // Simular proceso de creación de cuenta
-      setTimeout(() => {
-        alert('¡Cuenta creada exitosamente!\nNúmero de cuenta: ' + Math.floor(Math.random() * 1000000000) + '\nBienvenido a tu nueva cuenta bancaria.');
-        this.isSubmitting.set(false);
-        this.goBack();
-      }, 2000);
+      const base = (window as any)["API_BASE"] || 'http://localhost:4000';
+      const telefono = payload.telefono;
+      this.http.get(`${base}/api/clientes/existe`, { params: { rfc: payload.rfc, curp: payload.curp, email: payload.email, telefono } }).subscribe({
+        next: (chk: any) => {
+          if (chk?.exists) {
+            const f = chk.fields || {};
+            alert('Ya existe un cliente con: ' + [f.rfc && 'RFC', f.curp && 'CURP', f.email && 'Email', f.telefono && 'Teléfono'].filter(Boolean).join(', '));
+            this.isSubmitting.set(false);
+            return;
+          }
+          this.http.post(`${base}/api/clientes`, payload).subscribe({
+            next: (res: any) => {
+              alert('¡Cuenta creada exitosamente! ID cliente: ' + res.id);
+              this.isSubmitting.set(false);
+              this.goBack();
+            },
+            error: (err) => {
+              console.error(err);
+              alert('Error al crear cuenta');
+              this.isSubmitting.set(false);
+            }
+          });
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Error validando duplicados');
+          this.isSubmitting.set(false);
+        }
+      });
     } else {
       this.markFormGroupTouched();
     }

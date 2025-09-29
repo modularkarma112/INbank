@@ -1,0 +1,17 @@
+<div class="login-container">
+  <h2>INbank - Iniciar sesión</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>Usuario</label>
+    <input type="text" formControlName="usuario" />
+    <small class="error" *ngIf="form.controls.usuario.touched && form.controls.usuario.invalid">Usuario requerido</small>
+
+    <label>Contraseña</label>
+    <input type="password" formControlName="contrasena" />
+    <small class="error" *ngIf="form.controls.contrasena.touched && form.controls.contrasena.invalid">Contraseña requerida</small>
+
+    <button type="submit" [disabled]="loading">{{ loading ? 'Entrando...' : 'Entrar' }}</button>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </form>
+</div>
