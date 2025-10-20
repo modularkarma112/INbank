@@ -54,7 +54,7 @@ export class DashboardComponent {
 		else if (e.key === 'Escape' && this.menuOpen()) { this.menuOpen.set(false) }
 	}
 
-	// Método para cerrar sesión
+	// Cerrar sesión
 	onLogout() {
 		this.authService.logout();
 	}

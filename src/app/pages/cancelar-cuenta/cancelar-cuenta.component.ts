@@ -15,7 +15,7 @@ export class CancelarCuentaComponent {
   cancelForm: FormGroup;
   isSubmitting = signal(false);
 
-  // Opciones para motivos de cierre - México
+  // Motivos de cierre
   closeReasons = [
     { value: 'insatisfaccion_servicio', label: 'Insatisfacción con el servicio' },
     { value: 'cambio_banco', label: 'Cambio a otro banco' },
@@ -27,7 +27,7 @@ export class CancelarCuentaComponent {
     { value: 'otros', label: 'Otros motivos' }
   ];
 
-  // Bancos mexicanos principales
+  // Bancos mexicanos
   bancosMexicanos = [
     'BBVA México',
     'Santander México',
@@ -54,7 +54,7 @@ export class CancelarCuentaComponent {
     private authService: AuthService
   ) {
     this.cancelForm = this.fb.group({
-      // Datos del titular
+      // Datos titular
       accountNumber: ['', [Validators.required, Validators.pattern(/^\d{10,20}$/)]],
       rfc: ['', [Validators.required, Validators.pattern(/^[A-ZÑ&]{3,4}\d{6}[A-V1-9][A-Z1-9][0-9A]$/)]],
       curp: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/)]],
@@ -66,7 +66,7 @@ export class CancelarCuentaComponent {
       // Motivo de cierre
       closeReason: ['', Validators.required],
 
-      // Transferencia de saldo (opcional)
+      // Transferencia saldo
       transferAccount: [''],
       destinationBank: [''],
 
@@ -119,7 +119,7 @@ export class CancelarCuentaComponent {
     });
   }
 
-  // Métodos de utilidad para validación
+  // Errores validación
   getFieldError(fieldName: string): string {
     const field = this.cancelForm.get(fieldName);
     if (field?.errors && field.touched) {
@@ -149,7 +149,7 @@ export class CancelarCuentaComponent {
     return labels[fieldName] || fieldName;
   }
 
-  // Método para verificar si el formulario está completo
+  // Check si está completo
   isFormComplete(): boolean {
     const requiredFields = ['accountNumber', 'rfc', 'curp', 'firstName', 'lastName', 'email', 'phone', 'closeReason'];
     const allFieldsValid = requiredFields.every(fieldName => {

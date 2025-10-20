@@ -1,15 +1,7 @@
-/*
-===============================================
-IMPORTACIÓN DE FUENTE INTER
-===============================================
-*/
+/* Fuente Inter */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/*
-===============================================
-CONTENEDOR PRINCIPAL
-===============================================
-*/
+/* Contenedor */
 :host {
   display: block;
   min-height: 100vh;
@@ -23,11 +15,7 @@ CONTENEDOR PRINCIPAL
   padding: 30px 20px;
 }
 
-/*
-===============================================
-HEADER
-===============================================
-*/
+/* Header */
 .form-header {
   display: flex;
   align-items: center;

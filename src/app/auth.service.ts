@@ -52,7 +52,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
-    console.log('Sesión cerrada exitosamente');
+    console.log('Sesión cerrada');
   }
 
   isAuthenticated(): boolean {

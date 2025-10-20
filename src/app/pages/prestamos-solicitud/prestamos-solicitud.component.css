@@ -1,15 +1,7 @@
-/*
-===============================================
-IMPORTACIÓN DE FUENTE INTER
-===============================================
-*/
+/* Fuente Inter */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/*
-===============================================
-RESET Y CONFIGURACIÓN GLOBAL
-===============================================
-*/
+/* Reset */
 * {
   margin: 0;
   padding: 0;
@@ -19,27 +11,19 @@ RESET Y CONFIGURACIÓN GLOBAL
 :host {
   display: block;
   min-height: 100vh;
-  /* Mismo background del login y dashboard */
+  /* Background igual login/dashboard */
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   font-family: Inter, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/*
-===============================================
-CONTENEDOR PRINCIPAL
-===============================================
-*/
+/* Contenedor */
 .container {
   max-width: 1000px;
   margin: 0 auto;
   padding: 30px 20px;
 }
 
-/*
-===============================================
-HEADER - ESTILO UNIFICADO CON DASHBOARD
-===============================================
-*/
+/* Header */
 .header {
   display: flex;
   align-items: center;
@@ -105,11 +89,7 @@ HEADER - ESTILO UNIFICADO CON DASHBOARD
   font-family: Inter, system-ui, sans-serif;
 }
 
-/*
-===============================================
-CONTENEDOR DEL FORMULARIO - GLASSMORPHISM
-===============================================
-*/
+/* Contenedor formulario */
 .form-container {
   background: rgba(240, 242, 247, 0.75);
   backdrop-filter: blur(20px);
@@ -119,11 +99,7 @@ CONTENEDOR DEL FORMULARIO - GLASSMORPHISM
   border: 1px solid rgba(255,255,255,0.4);
 }
 
-/*
-===============================================
-SECCIONES DEL FORMULARIO
-===============================================
-*/
+/* Secciones */
 .form-section {
   margin-bottom: 50px;
 }
@@ -174,11 +150,7 @@ h3 {
   font-family: Inter, system-ui, sans-serif;
 }
 
-/*
-===============================================
-GRID DEL FORMULARIO
-===============================================
-*/
+/* Grid */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -194,11 +166,7 @@ GRID DEL FORMULARIO
   grid-column: span 2;
 }
 
-/*
-===============================================
-LABELS Y CAMPOS
-===============================================
-*/
+/* Labels y campos */
 label {
   font-size: 0.9rem;
   font-weight: 500;
@@ -250,11 +218,7 @@ select {
   cursor: pointer;
 }
 
-/*
-===============================================
-BOTONES - ESTILO UNIFICADO
-===============================================
-*/
+/* Botones */
 .button-group {
   display: flex;
   gap: 20px;
@@ -306,11 +270,7 @@ BOTONES - ESTILO UNIFICADO
   transform: translateY(0);
 }
 
-/*
-===============================================
-RESPONSIVE DESIGN
-===============================================
-*/
+/* Responsive */
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;

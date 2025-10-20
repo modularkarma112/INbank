@@ -15,7 +15,7 @@ export class AbrirCuentaComponent {
   accountForm: FormGroup;
   isSubmitting = signal(false);
 
-  // Estados de México
+  // Estados
   estados = [
     'Aguascalientes',
     'Baja California',
@@ -51,7 +51,7 @@ export class AbrirCuentaComponent {
     'Zacatecas'
   ];
 
-  // Ciudades principales por estado
+  // Ciudades x estado
   ciudadesPorEstado: { [key: string]: string[] } = {
     'Aguascalientes': ['Aguascalientes', 'Calvillo', 'Jesús María', 'Pabellón de Arteaga'],
     'Baja California': ['Tijuana', 'Mexicali', 'Ensenada', 'Rosarito', 'Tecate'],
@@ -87,7 +87,6 @@ export class AbrirCuentaComponent {
     'Zacatecas': ['Zacatecas', 'Fresnillo', 'Guadalupe', 'Jerez', 'Río Grande']
   };
 
-  // Lista de ciudades para el campo seleccionado
   ciudadesDisponibles: string[] = [];
 
   occupations = [
@@ -116,7 +115,7 @@ export class AbrirCuentaComponent {
 
   constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
     this.accountForm = this.fb.group({
-      // Datos del Cliente
+      // Datos cliente
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       rfc: ['', [Validators.required, Validators.pattern(/^[A-ZÑ&]{3,4}\d{6}[A-V1-9][A-Z1-9][0-9A]$/)]],
@@ -128,11 +127,11 @@ export class AbrirCuentaComponent {
       address: ['', [Validators.required, Validators.minLength(10)]],
       postalCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
 
-      // Información Financiera
+      // Info financiera
       occupation: ['', Validators.required],
       monthlyIncome: ['', [Validators.required, Validators.min(0)]],
 
-      // Detalles de la cuenta
+      // Tipo cuenta
       accountType: ['', Validators.required],
       initialDeposit: ['', [Validators.required, Validators.min(500)]]
     });
@@ -199,11 +198,11 @@ export class AbrirCuentaComponent {
     this.router.navigate(['/dashboard']);
   }
 
-  // Método para actualizar ciudades cuando se selecciona un estado
+  // Actualiza ciudades al cambiar estado
   onEstadoChange(estado: string) {
     if (estado && this.ciudadesPorEstado[estado]) {
       this.ciudadesDisponibles = this.ciudadesPorEstado[estado];
-      // Limpiar la selección de ciudad cuando cambia el estado
+      // Limpia ciudad al cambiar estado
       this.accountForm.patchValue({ city: '' });
     } else {
       this.ciudadesDisponibles = [];
@@ -219,7 +218,7 @@ export class AbrirCuentaComponent {
     });
   }
 
-  // Métodos de utilidad para validación
+  // Errores de validación
   getFieldError(fieldName: string): string {
     const field = this.accountForm.get(fieldName);
     if (field?.errors && field.touched) {

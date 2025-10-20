@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class PrestamosSolicitudComponent {
 
-  // Datos del formulario - México
+  // Datos formulario
   solicitante = {
     nombres: '',
     apellidos: '',
@@ -41,7 +41,7 @@ export class PrestamosSolicitudComponent {
     plazo: ''
   };
 
-  // Tipos de préstamo en México
+  // Tipos préstamo
   tiposPrestamo = [
     { value: 'personal', label: 'Préstamo Personal' },
     { value: 'hipotecario', label: 'Crédito Hipotecario' },
@@ -50,7 +50,7 @@ export class PrestamosSolicitudComponent {
     { value: 'pyme', label: 'Crédito PyME' }
   ];
 
-  // Montos sugeridos en pesos mexicanos
+  // Montos (MXN)
   montosSugeridos = [
     { value: '50000', label: '$50,000 MXN' },
     { value: '100000', label: '$100,000 MXN' },
@@ -59,7 +59,7 @@ export class PrestamosSolicitudComponent {
     { value: '1000000', label: '$1,000,000 MXN' }
   ];
 
-  // Plazos en meses
+  // Plazos
   plazos = [
     { value: '12', label: '12 meses' },
     { value: '24', label: '24 meses' },
@@ -68,7 +68,7 @@ export class PrestamosSolicitudComponent {
     { value: '60', label: '60 meses' }
   ];
 
-  // Estados de México
+  // Estados
   estados = [
     'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Coahuila',
     'Colima', 'Chiapas', 'Chihuahua', 'Ciudad de México', 'Durango', 'Guanajuato',
@@ -77,7 +77,7 @@ export class PrestamosSolicitudComponent {
     'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
   ];
 
-  // Ciudades principales por estado
+  // Ciudades x estado
   ciudadesPorEstado: { [key: string]: string[] } = {
     'Aguascalientes': ['Aguascalientes', 'Calvillo', 'Jesús María', 'Pabellón de Arteaga'],
     'Baja California': ['Tijuana', 'Mexicali', 'Ensenada', 'Rosarito', 'Tecate'],
@@ -113,35 +113,33 @@ export class PrestamosSolicitudComponent {
     'Zacatecas': ['Zacatecas', 'Fresnillo', 'Guadalupe', 'Jerez', 'Río Grande']
   };
 
-  // Lista de ciudades para el estado seleccionado
   ciudadesDisponibles: string[] = [];
 
   constructor(private router: Router) {}
 
-  // Método para regresar al dashboard
+  // Volver al dashboard
   goBack() {
     this.router.navigate(['/dashboard']);
   }
 
-  // Método para cancelar
+  // Cancelar
   onCancel() {
     this.goBack();
   }
 
-  // Método para actualizar ciudades cuando se selecciona un estado
+  // Cambio de estado
   onEstadoChange(estado: string) {
     if (estado && this.ciudadesPorEstado[estado]) {
       this.ciudadesDisponibles = this.ciudadesPorEstado[estado];
-      // Limpiar la selección de ciudad cuando cambia el estado
+      // Limpia ciudad
       this.solicitante.ciudad = '';
     } else {
       this.ciudadesDisponibles = [];
     }
   }
 
-  // Método para enviar la solicitud
+  // Enviar solicitud
   onSubmit() {
-    // Validación básica
     if (this.isFormValid()) {
       console.log('Solicitud de préstamo:', {
         solicitante: this.solicitante,
@@ -156,7 +154,7 @@ export class PrestamosSolicitudComponent {
     }
   }
 
-  // Validación del formulario
+  // Check validación
   private isFormValid(): boolean {
     return !!(
       this.solicitante.nombres &&
