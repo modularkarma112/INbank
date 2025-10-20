@@ -20,7 +20,7 @@
 				</button>
 				<ul [class.hide]="!sec.open">
 					@for (it of sec.items; track it.label) {
-						<li><a [routerLink]="it.link">{{ it.label }}</a></li>
+						<li><a [routerLink]="it.link" (click)="toggleMenu()">{{ it.label }}</a></li>
 					}
 				</ul>
 			</div>

@@ -7,6 +7,8 @@ import clientesRoutes from './clientes';
 import tiposCuentaRoutes from './tiposCuenta';
 import cuentasRoutes from './cuentas';
 import prestamosRoutes from './prestamos';
+import usuariosRoutes from './usuarios';
+import transferenciasRoutes from './transferencias';
 import { pingDb } from './db';
 
 dotenv.config();
@@ -30,6 +32,8 @@ app.use('/api/clientes', clientesRoutes);
 app.use('/api/tipos-cuenta', tiposCuentaRoutes);
 app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/prestamos', prestamosRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/transferencias', transferenciasRoutes);
 
 const port = Number(process.env.PORT) || 4000;
 app.listen(port, () => {

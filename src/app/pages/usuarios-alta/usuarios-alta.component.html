@@ -1,0 +1,57 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <h2>Alta de Usuarios</h2>
+    <a class="btn btn-secondary" routerLink="/dashboard">Volver</a>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-3">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Usuario</label>
+        <input class="form-control" formControlName="usuario" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Nombre</label>
+        <input class="form-control" formControlName="nombre" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Apellido Paterno</label>
+        <input class="form-control" formControlName="apellido_paterno" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Apellido Materno</label>
+        <input class="form-control" formControlName="apellido_materno" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Correo</label>
+        <input class="form-control" formControlName="correo" type="email" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Contraseña</label>
+        <input class="form-control" formControlName="contrasena" type="password" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">CURP</label>
+        <input class="form-control" formControlName="curp" />
+      </div>
+      <div class="col-12">
+        <label class="form-label">Dirección</label>
+        <textarea class="form-control" rows="2" formControlName="direccion"></textarea>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Teléfono (10 dígitos)</label>
+        <input class="form-control" formControlName="telefono" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Rol</label>
+        <select class="form-select" formControlName="rol">
+          <option *ngFor="let r of roles" [value]="r">{{r}}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-primary" type="submit" [disabled]="isSubmitting()">Crear</button>
+      <a class="btn btn-secondary" routerLink="/dashboard">Cancelar</a>
+    </div>
+  </form>
+</div>

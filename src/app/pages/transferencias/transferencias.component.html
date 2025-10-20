@@ -1,0 +1,101 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <h2>Transferencias</h2>
+    <a class="btn btn-secondary" routerLink="/dashboard">Volver</a>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-3">
+    <div class="card p-3 mb-3">
+      <h5>Cuenta Origen</h5>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label">Número de cuenta</label>
+          <input class="form-control" formControlName="origenNumeroCuenta" (blur)="resolverOrigen()" placeholder="16 dígitos" />
+        </div>
+        <div class="col-md-6">
+          <div *ngIf="origenCuenta">
+            <small class="text-muted">Saldo: {{ origenCuenta.saldo | number:'1.2-2' }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h5>Destino</h5>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label class="form-label">Mismo banco</label>
+          <select class="form-select" formControlName="mismoBanco">
+            <option [ngValue]="true">Sí</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Tipo de identificador</label>
+          <select class="form-select" formControlName="destinoTipo">
+            <option value="NUMERO_CUENTA">Número de Cuenta</option>
+            <option value="CLABE">CLABE</option>
+            <option value="TELEFONO">Teléfono</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Identificador</label>
+          <input class="form-control" formControlName="destinoIdentificador" placeholder="Cuenta / CLABE / Teléfono" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nombre del propietario</label>
+          <input class="form-control" formControlName="destinoNombre" />
+        </div>
+        <div class="col-md-6" *ngIf="!form.controls.mismoBanco.value">
+          <label class="form-label">Banco destino</label>
+          <input class="form-control" formControlName="destinoBanco" placeholder="Nombre del banco" />
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <label class="form-label">Buscar contacto</label>
+        <div class="input-group">
+          <input class="form-control" formControlName="buscarContacto" placeholder="Nombre/identificador" />
+          <button type="button" class="btn btn-outline-secondary" (click)="buscarContactos()" [disabled]="buscandoContactos()">Buscar</button>
+        </div>
+        <div class="list-group mt-2" *ngIf="contactos().length">
+          <button type="button" class="list-group-item list-group-item-action"
+                  *ngFor="let c of contactos()"
+                  (click)="usarContacto(c)">
+            <div class="d-flex justify-content-between">
+              <strong>{{ c.nombre_propietario }}</strong>
+              <small class="text-muted">{{ c.identificador_tipo }} · {{ c.identificador }}</small>
+            </div>
+            <div><small>{{ c.alias || c.banco }}</small></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h5>Monto y concepto</h5>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Monto</label>
+          <input type="number" class="form-control" formControlName="monto" (input)="actualizarComision()" />
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Concepto</label>
+          <input class="form-control" formControlName="concepto" />
+        </div>
+      </div>
+      <div class="mt-2">
+        <small>Comisión: <strong>${{ comision() }}</strong> · Total a debitar: <strong>${{ total() }}</strong></small>
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input type="checkbox" class="form-check-input" id="guardarContacto" formControlName="guardarContacto" />
+      <label class="form-check-label" for="guardarContacto">Guardar como contacto</label>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Transferir</button>
+      <a routerLink="/dashboard" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>

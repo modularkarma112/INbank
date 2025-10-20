@@ -25,3 +25,4 @@ async function pingDb() {
         conn.release();
     }
 }
+//# sourceMappingURL=db.js.map

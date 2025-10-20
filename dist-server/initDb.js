@@ -21,7 +21,7 @@ async function run() {
         .replace(/--.*$/gm, '')
         .replace(/\/\*[^]*?\*\//g, '');
     const statements = cleaned
-        .split(/;\s*\n/) 
+        .split(/;\s*\n/)
         .map(s => s.trim())
         .filter(s => s.length);
     console.log('Conectando sin base de datos para crear/actualizar schema...');
@@ -33,7 +33,6 @@ async function run() {
                 console.log('OK:', stmt.substring(0, 60).replace(/\s+/g, ' ') + (stmt.length > 60 ? '...' : ''));
             }
             catch (e) {
-                // Si es un error por índice duplicado u objeto existente, lo avisamos y seguimos
                 const msg = e?.message || '';
                 if (/exists|Duplicate/i.test(msg)) {
                     console.log('AVISO (ignorado):', msg);

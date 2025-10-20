@@ -19,6 +19,14 @@ router.get('/cliente/:clienteId', authGuard, async (req, res) => {
   res.json(rows);
 });
 
+router.get('/numero/:numero', authGuard, async (req, res) => {
+  const numero = req.params.numero;
+  const [rows] = await pool.query('SELECT * FROM cuentas WHERE numero_cuenta = ? LIMIT 1', [numero]);
+  const row = (rows as any[])[0];
+  if (!row) return res.status(404).json({ message: 'Cuenta no encontrada' });
+  res.json(row);
+});
+
 router.get('/por-numero/:numero', authGuard, async (req, res) => {
   const numero = req.params.numero;
   const [rows] = await pool.query('SELECT * FROM cuentas WHERE numero_cuenta = ? LIMIT 1', [numero]);
@@ -30,32 +38,16 @@ router.get('/por-numero/:numero', authGuard, async (req, res) => {
 router.post('/', authGuard, async (req, res) => {
   const { cliente_id, tipo_cuenta_id, deposito_inicial } = req.body || {};
   if (!cliente_id || !tipo_cuenta_id) return res.status(400).json({ message: 'cliente_id y tipo_cuenta_id requeridos' });
+  const numero = genNumeroCuenta();
   const saldoInicial = Number(deposito_inicial ?? 0);
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    let cuentaId: number | null = null;
-    let numero = '';
-    for (let intento = 0; intento < 5; intento++) {
-      numero = genNumeroCuenta();
-      try {
-        const [result] = await conn.execute(
-          'INSERT INTO cuentas (numero_cuenta, cliente_id, tipo_cuenta_id, saldo, estatus) VALUES (?, ?, ?, ?, ?)',
-          [numero, cliente_id, tipo_cuenta_id, saldoInicial, 'ACTIVA']
-        );
-        cuentaId = (result as any).insertId as number;
-        break;
-      } catch (e: any) {
-        if (e?.code === 'ER_DUP_ENTRY') {
-          continue;
-        }
-        throw e;
-      }
-    }
-    if (!cuentaId) {
-      await conn.rollback();
-      return res.status(500).json({ message: 'No se pudo generar un número de cuenta único' });
-    }
+    const [result] = await conn.execute(
+      'INSERT INTO cuentas (numero_cuenta, cliente_id, tipo_cuenta_id, saldo, estatus) VALUES (?, ?, ?, ?, ?)',
+      [numero, cliente_id, tipo_cuenta_id, saldoInicial, 'ACTIVA']
+    );
+    const cuentaId = (result as any).insertId;
     if (saldoInicial > 0) {
       await conn.execute(
         'INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)',
