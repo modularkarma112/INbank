@@ -110,8 +110,8 @@ export class TransferenciasComponent {
     };
     try {
       const r: any = await this.http.post(`${this.api}/api/transferencias`, payload).toPromise();
-      alert(`Transferencia realizada. Comisión: $${r?.comision ?? this.comision()}. Total debitado: $${r?.totalDebitar ?? this.total()}`);
-      this.router.navigate(['/dashboard']);
+      // Redirigir al comprobante con el ID de la transferencia
+      this.router.navigate(['/comprobante-transferencia', r.id]);
     } catch (e: any) {
       alert(e?.error?.message || 'Error ejecutando transferencia');
     }

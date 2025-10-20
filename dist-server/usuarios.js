@@ -31,5 +31,11 @@ router.post('/', middleware_1.authGuard, async (req, res) => {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [usuario, nombre, apellido_paterno ?? null, apellido_materno ?? null, correo, hash, curp ?? null, direccion ?? null, telefono ?? null, rol || 'GERENTE']);
     res.status(201).json({ id: result.insertId });
 });
+// Eliminar usuario por id
+router.delete('/:id', middleware_1.authGuard, async (req, res) => {
+    const id = Number(req.params.id);
+    await db_1.pool.execute('DELETE FROM usuarios WHERE id = ?', [id]);
+    res.json({ ok: true });
+});
 exports.default = router;
 //# sourceMappingURL=usuarios.js.map

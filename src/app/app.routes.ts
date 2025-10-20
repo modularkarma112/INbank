@@ -19,6 +19,7 @@ export const routes: Routes = [
 	{ path: 'cancelar-cuenta', canActivate: [canActivateAuth], loadComponent: () => import('./pages/cancelar-cuenta/cancelar-cuenta.component').then(m => m.CancelarCuentaComponent) },
 	{ path: 'prestamos-solicitud', canActivate: [canActivateAuth], loadComponent: () => import('./pages/prestamos-solicitud/prestamos-solicitud.component').then(m => m.PrestamosSolicitudComponent) },
 	{ path: 'transferencias', canActivate: [canActivateAuth], loadComponent: () => import('./pages/transferencias/transferencias.component').then(m => m.TransferenciasComponent) },
+	{ path: 'comprobante-transferencia/:id', canActivate: [canActivateAuth], loadComponent: () => import('./pages/comprobante-transferencia/comprobante-transferencia.component').then(m => m.ComprobanteTransferenciaComponent) },
 	{ path: 'usuarios/alta', canActivate: [canActivateAuth], loadComponent: () => import('./pages/usuarios-alta/usuarios-alta.component').then(m => m.UsuariosAltaComponent) },
 	{ path: 'clientes', canActivate: [canActivateAuth], loadComponent: () => import('./pages/clientes/clientes.component').then(m => m.ClientesComponent) },
 	{ path: 'cuentas', canActivate: [canActivateAuth], loadComponent: () => import('./pages/cuentas/cuentas.component').then(m => m.CuentasComponent) },

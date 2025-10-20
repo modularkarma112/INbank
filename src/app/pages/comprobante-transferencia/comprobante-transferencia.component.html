@@ -1,0 +1,88 @@
+<div class="comprobante-container" *ngIf="!cargando() && transferencia()">
+  <div class="comprobante">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">🏦</div>
+        <div class="logo-text">INBank</div>
+      </div>
+      <div class="titulo">
+        <h1>COMPROBANTE DE TRANSFERENCIA</h1>
+        <p class="autorizacion">Autorización: {{ fechaActual | date:'dd/MM/yyyy' }}, {{ fechaActual | date:'HH:mm' }} (hora de CDMX)</p>
+      </div>
+    </div>
+
+    <!-- Sección Monto -->
+    <div class="seccion">
+      <div class="fila">
+        <div class="campo">Monto</div>
+        <div class="valor">${{ transferencia().monto | number:'1.2-2' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Tipo de transferencia</div>
+        <div class="valor">{{ transferencia().destino_banco ? 'Interbancaria' : 'Mismo banco' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Concepto</div>
+        <div class="valor">{{ transferencia().concepto || 'Sin concepto' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Número de referencia</div>
+        <div class="valor">#{{ transferencia().id }}</div>
+      </div>
+    </div>
+
+    <!-- Cuenta Destino -->
+    <div class="seccion-titulo">Cuenta destino</div>
+    <div class="seccion">
+      <div class="fila">
+        <div class="campo">Nombre</div>
+        <div class="valor">{{ transferencia().destino_nombre }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Entidad</div>
+        <div class="valor">{{ transferencia().destino_banco || 'INBank' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">{{ transferencia().destino_tipo === 'CLABE' ? 'CLABE' : 'Número de cuenta / Número de tarjeta' }}</div>
+        <div class="valor">{{ transferencia().destino_identificador }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Estatus</div>
+        <div class="valor estado-completada">{{ transferencia().estado }}</div>
+      </div>
+      <div class="fila" *ngIf="transferencia().destino_tipo === 'CLABE'">
+        <div class="campo">Clave de rastreo</div>
+        <div class="valor">{{ transferencia().id }}-{{ fechaActual.getTime() }}</div>
+      </div>
+    </div>
+
+    <!-- Cuenta Origen -->
+    <div class="seccion-titulo">Cuenta origen</div>
+    <div class="seccion">
+      <div class="fila">
+        <div class="campo">Nombre</div>
+        <div class="valor">{{ transferencia().origen_nombre || 'Tu cuenta' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Entidad</div>
+        <div class="valor">INBank</div>
+      </div>
+      <div class="fila">
+        <div class="campo">CLABE</div>
+        <div class="valor">{{ transferencia().origen_numero_cuenta }}</div>
+      </div>
+    </div>
+
+    <!-- Botón Volver -->
+    <div class="acciones">
+      <button class="btn-volver" (click)="volver()">VOLVER</button>
+      <button class="btn-imprimir" (click)="imprimir()">IMPRIMIR</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="cargando()">
+  <p>Cargando comprobante...</p>
+</div>
+

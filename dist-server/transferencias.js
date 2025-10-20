@@ -10,7 +10,14 @@ function calcularComision(monto) {
     const tramos = Math.ceil(monto / 100);
     return monto > 1500 ? tramos * 10 : tramos * 5;
 }
-// Buscar contactos por cliente + texto (identificador o nombre)
+// Preview de comisión (DEBE IR ANTES de /:id)
+router.get('/comision', middleware_1.authGuard, async (req, res) => {
+    const monto = Number(req.query.monto);
+    if (!monto || monto <= 0)
+        return res.status(400).json({ message: 'monto inválido' });
+    res.json({ monto, comision: calcularComision(monto) });
+});
+// Buscar contactos por cliente + texto (DEBE IR ANTES de /:id)
 router.get('/contactos', middleware_1.authGuard, async (req, res) => {
     const clienteId = Number(req.query.cliente_id);
     const q = String(req.query.q || '').trim();
@@ -21,6 +28,34 @@ router.get('/contactos', middleware_1.authGuard, async (req, res) => {
      WHERE cliente_id = ? AND (identificador LIKE ? OR nombre_propietario LIKE ? OR COALESCE(alias,'') LIKE ?)
      ORDER BY creado_en DESC LIMIT 50`, [clienteId, like, like, like]);
     res.json(rows);
+});
+// Obtener detalles de una transferencia específica (DESPUÉS de rutas específicas)
+router.get('/:id', middleware_1.authGuard, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!id)
+        return res.status(400).json({ message: 'ID inválido' });
+    try {
+        const [rows] = await db_1.pool.query(`SELECT t.*, 
+              c_origen.numero_cuenta as origen_numero_cuenta,
+              c_origen.saldo as origen_saldo,
+              cl_origen.nombres as origen_nombres,
+              cl_origen.apellido_paterno as origen_apellido_paterno
+       FROM transferencias t
+       LEFT JOIN cuentas c_origen ON t.origen_cuenta_id = c_origen.id
+       LEFT JOIN clientes cl_origen ON c_origen.cliente_id = cl_origen.id
+       WHERE t.id = ? LIMIT 1`, [id]);
+        const transferencia = rows[0];
+        if (!transferencia)
+            return res.status(404).json({ message: 'Transferencia no encontrada' });
+        // Agregar nombre completo del origen
+        if (transferencia.origen_nombres) {
+            transferencia.origen_nombre = `${transferencia.origen_nombres} ${transferencia.origen_apellido_paterno}`;
+        }
+        res.json(transferencia);
+    }
+    catch (e) {
+        res.status(500).json({ message: 'Error obteniendo transferencia' });
+    }
 });
 // Crear contacto
 router.post('/contactos', middleware_1.authGuard, async (req, res) => {
