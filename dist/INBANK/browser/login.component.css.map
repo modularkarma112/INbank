@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/login/login.component.css"],
+  "sourcesContent": [".login-container{max-width:360px;margin:40px auto;padding:24px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}\r\nlabel{display:block;margin-top:12px;color:#333}\r\ninput{width:100%;padding:8px 10px;margin-top:6px;border:1px solid #ccc;border-radius:4px}\r\nbutton{margin-top:16px;width:100%;padding:10px;border:0;border-radius:6px;background:#0066ff;color:#fff}\r\n.error{color:#c0392b;margin-top:10px}\r\n"],
+  "mappings": ";AAAA,CAAC;AAAgB,aAAU;AAAM,UAAO,KAAK;AAAK,WAAQ;AAAK,cAAW;AAAK,iBAAc;AAAI,cAAW,EAAE,IAAI,IAAI,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAI;AACrI;AAAM,WAAQ;AAAM,cAAW;AAAK,SAAM;AAAI;AAC9C;AAAM,SAAM;AAAK,WAAQ,IAAI;AAAK,cAAW;AAAI,UAAO,IAAI,MAAM;AAAK,iBAAc;AAAG;AACxF;AAAO,cAAW;AAAK,SAAM;AAAK,WAAQ;AAAK,UAAO;AAAE,iBAAc;AAAI,cAAW;AAAQ,SAAM;AAAI;AACvG,CAAC;AAAM,SAAM;AAAQ,cAAW;AAAI;",
+  "names": []
+}

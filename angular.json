@@ -37,6 +37,7 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": { "proxyConfig": "proxy.conf.json" },
           "configurations": {
             "production": { "buildTarget": "INBANK:build:production" },
             "development": { "buildTarget": "INBANK:build:development" }

@@ -11,7 +11,8 @@ async function run() {
     const port = Number(process.env.DB_PORT) || 3306;
     const user = process.env.DB_USER || 'root';
     const password = process.env.DB_PASSWORD || 'root';
-    const schemaPath = path_1.default.join(__dirname, '..', 'db', 'schema.sql');
+    // El esquema vive en server/db/schema.sql dentro del proyecto
+    const schemaPath = path_1.default.join(__dirname, 'db', 'schema.sql');
     if (!fs_1.default.existsSync(schemaPath)) {
         console.error('No se encontró schema.sql en db/');
         process.exit(1);

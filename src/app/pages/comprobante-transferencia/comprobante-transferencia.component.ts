@@ -52,6 +52,19 @@ export class ComprobanteTransferenciaComponent implements OnInit {
   imprimir() {
     window.print();
   }
+  async descargarPdf() {
+    try {
+      const id = this.route.snapshot.paramMap.get('id');
+      const url = `${this.api}/api/transferencias/${id}/pdf`;
+      const blob = await this.http.get(url, { responseType: 'blob' as any }).toPromise();
+      const a = document.createElement('a');
+      const b = window.URL.createObjectURL(blob as any);
+      a.href = b; a.download = `comprobante-transferencia-${id}.pdf`; a.click();
+      setTimeout(() => URL.revokeObjectURL(b), 1000);
+    } catch (e) {
+      alert('No se pudo descargar el PDF');
+    }
+  }
 
   volver() {
     this.router.navigate(['/dashboard']);

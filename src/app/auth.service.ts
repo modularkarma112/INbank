@@ -20,11 +20,12 @@ export class AuthService {
     }
   }
 
-
   async loginApi(usuario: string, contrasena: string): Promise<void> {
-    const base = (window as any)["API_BASE"] || 'http://localhost:4000';
+    const base = 'http://3.139.254.175'; 
+
     try {
       const resp = await firstValueFrom(
+
         this.http.post<{ token: string; user: any }>(`${base}/api/auth/login`, { usuario, contrasena })
       );
       if (!resp?.token) throw new Error('Respuesta inválida del servidor');

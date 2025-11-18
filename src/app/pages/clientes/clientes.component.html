@@ -1,7 +1,79 @@
-<div class="container mt-4">
-	<div class="d-flex justify-content-between align-items-center">
+<div class="clientes-container">
+	<div class="header">
 		<h2>Clientes</h2>
-		<a class="btn btn-secondary" routerLink="/dashboard">Volver</a>
+		<div class="header-actions">
+			<button class="btn" (click)="crearCliente()">+ Crear cliente</button>
+			<a class="btn btn-secondary" routerLink="/dashboard">Volver</a>
+		</div>
 	</div>
-	<p>Página en construcción.</p>
+
+	<form [formGroup]="filtros" (ngSubmit)="buscar()" class="filters">
+		<div class="row">
+			<div class="field">
+				<label>ID</label>
+				<input type="number" formControlName="id" placeholder="Número de cliente" />
+			</div>
+			<div class="field">
+				<label>RFC</label>
+				<input type="text" formControlName="rfc" placeholder="RFC exacto" />
+			</div>
+			<div class="field">
+				<label>CURP</label>
+				<input type="text" formControlName="curp" placeholder="CURP exacto" />
+			</div>
+			<div class="field grow">
+				<label>Nombre</label>
+				<input type="text" formControlName="nombre" placeholder="Buscar por nombre o apellidos" />
+			</div>
+		</div>
+		<div class="filter-actions">
+			<button type="submit" class="btn primary" [disabled]="cargando()">Buscar</button>
+			<button type="button" class="btn" (click)="limpiar()" [disabled]="cargando()">Limpiar</button>
+		</div>
+	</form>
+
+	<div class="alert error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+	<div class="table-wrapper" *ngIf="!cargando(); else loadingTpl">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Nombre</th>
+					<th>RFC</th>
+					<th>CURP</th>
+					<th>Email</th>
+					<th>Teléfono</th>
+					<th>Ubicación</th>
+					<th>Ingresos</th>
+					<th>Creado</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let c of clientes">
+					<td>{{ c.id }}</td>
+					<td>{{ c.nombres }} {{ c.apellido_paterno }} {{ c.apellido_materno }}</td>
+					<td>{{ c.rfc }}</td>
+					<td>{{ c.curp }}</td>
+					<td>{{ c.email }}</td>
+					<td>{{ c.telefono }}</td>
+					<td>{{ c.ciudad || '-' }}, {{ c.estado || '-' }}</td>
+					<td>{{ c.ingresos_mensuales | number:'1.0-2' }}</td>
+					<td>{{ c.creado_en | date:'short' }}</td>
+										<td>
+											<a class="btn" [routerLink]="['/clientes', c.id]">Perfil</a>
+											<button class="btn" style="margin-left:6px" (click)="generarReporteCliente(c)">Generar reporte</button>
+										</td>
+				</tr>
+				<tr *ngIf="clientes.length === 0">
+					<td colspan="9" class="empty">Sin resultados</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<ng-template #loadingTpl>
+		<div class="loading">Cargando clientes…</div>
+	</ng-template>
 </div>

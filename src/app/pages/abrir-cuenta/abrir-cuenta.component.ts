@@ -105,12 +105,12 @@ export class AbrirCuentaComponent {
     'Otro'
   ];
 
+  // Tipos de cuenta disponibles (alineados con el catálogo del backend)
+  // 1 = Nómina, 2 = Ahorro, 3 = Inversión
   accountTypes = [
-    { value: 'ahorro', label: 'Cuenta de Ahorro' },
-    { value: 'cheques', label: 'Cuenta de Cheques' },
     { value: 'nomina', label: 'Cuenta de Nómina' },
-    { value: 'joven', label: 'Cuenta Joven' },
-    { value: 'basica', label: 'Cuenta Básica Sin Comisiones' }
+    { value: 'ahorro', label: 'Cuenta de Ahorro' },
+    { value: 'inversion', label: 'Cuenta de Inversión' }
   ];
 
   constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
@@ -135,6 +135,9 @@ export class AbrirCuentaComponent {
       accountType: ['', Validators.required],
       initialDeposit: ['', [Validators.required, Validators.min(500)]]
     });
+
+
+    this.accountForm.get('city')?.disable({ emitEvent: false });
   }
 
   onSubmit() {
@@ -166,15 +169,30 @@ export class AbrirCuentaComponent {
             this.isSubmitting.set(false);
             return;
           }
-          this.http.post(`${base}/api/clientes`, payload).subscribe({
+          
+          // Agregar datos de la cuenta al payload
+          const payloadCompleto = {
+            ...payload,
+            // Mapear valor seleccionado -> id esperado por el backend
+            tipo_cuenta_id: formData.accountType === 'nomina' ? 1 :
+                            formData.accountType === 'ahorro' ? 2 :
+                            formData.accountType === 'inversion' ? 3 : 1,
+            deposito_inicial: Number(formData.initialDeposit)
+          };
+          
+          // Usar el nuevo endpoint que crea cliente Y cuenta
+          this.http.post(`${base}/api/clientes/con-cuenta`, payloadCompleto).subscribe({
             next: (res: any) => {
-              alert('¡Cuenta creada exitosamente! ID cliente: ' + res.id);
+              alert(`¡Cuenta creada exitosamente!\n\nCliente ID: ${res.cliente_id}\nNúmero de cuenta: ${res.numero_cuenta}\nSaldo inicial: $${res.saldo_inicial.toFixed(2)} MXN\n\nSe ha enviado un email de confirmación.`);
               this.isSubmitting.set(false);
               this.goBack();
             },
             error: (err) => {
-              console.error(err);
-              alert('Error al crear cuenta');
+              console.error('Error creando cliente con cuenta:', err);
+              const baseMsg = err?.error?.message || err?.message || 'Error creando cliente con cuenta';
+              const detail = err?.error?.error || err?.error?.sqlMessage || '';
+              const msg = detail ? `${baseMsg}\n\nDetalle: ${detail}` : baseMsg;
+              alert(msg);
               this.isSubmitting.set(false);
             }
           });
@@ -204,8 +222,11 @@ export class AbrirCuentaComponent {
       this.ciudadesDisponibles = this.ciudadesPorEstado[estado];
       // Limpia ciudad al cambiar estado
       this.accountForm.patchValue({ city: '' });
+      this.accountForm.get('city')?.enable({ emitEvent: false });
     } else {
       this.ciudadesDisponibles = [];
+      this.accountForm.patchValue({ city: '' });
+      this.accountForm.get('city')?.disable({ emitEvent: false });
     }
   }
 

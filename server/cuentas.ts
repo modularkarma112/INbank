@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from './db';
 import { authGuard } from './middleware';
+import { enviarNotificacionMovimiento, renderComprobanteMovimiento, generateComprobanteMovimientoPdf } from './mailer';
 
 const router = Router();
 
@@ -10,6 +11,24 @@ function genNumeroCuenta() {
 
 router.get('/', authGuard, async (_req, res) => {
   const [rows] = await pool.query('SELECT * FROM cuentas LIMIT 200');
+  res.json(rows);
+});
+
+// Búsqueda por número de cuenta o por nombre del cliente (parcial)
+router.get('/buscar', authGuard, async (req, res) => {
+  const { numero, nombre } = req.query as Record<string, string>;
+  const params: any[] = [];
+  let where = '1=1';
+  if (numero) { where += ' AND c.numero_cuenta LIKE ?'; params.push(`%${numero}%`); }
+  if (nombre) { 
+    where += ' AND (cl.nombres LIKE ? OR cl.apellido_paterno LIKE ? OR cl.apellido_materno LIKE ? OR CONCAT(cl.nombres, " ", cl.apellido_paterno, " ", cl.apellido_materno) LIKE ?)';
+    for (let i = 0; i < 4; i++) params.push(`%${nombre}%`);
+  }
+  const [rows] = await pool.query(
+    `SELECT c.*, cl.nombres, cl.apellido_paterno, cl.apellido_materno 
+     FROM cuentas c JOIN clientes cl ON c.cliente_id = cl.id 
+     WHERE ${where} ORDER BY c.id DESC LIMIT 200`, params
+  );
   res.json(rows);
 });
 
@@ -33,6 +52,60 @@ router.get('/por-numero/:numero', authGuard, async (req, res) => {
   const row = (rows as any[])[0];
   if (!row) return res.status(404).json({ message: 'Cuenta no encontrada' });
   res.json(row);
+});
+
+// Obtener un movimiento/transacción por ID (para comprobantes)
+router.get('/transacciones/:transId', authGuard, async (req, res) => {
+  const transId = Number(req.params.transId);
+  if (!Number.isFinite(transId)) return res.status(400).json({ message: 'ID inválido' });
+  try {
+    const [rows] = await pool.query(`
+      SELECT t.*, c.numero_cuenta, c.cliente_id,
+             cl.nombres, cl.apellido_paterno, cl.apellido_materno
+      FROM transacciones t
+      JOIN cuentas c ON t.cuenta_id = c.id
+      JOIN clientes cl ON c.cliente_id = cl.id
+      WHERE t.id = ?
+      LIMIT 1
+    `, [transId]);
+    const tx = (rows as any[])[0];
+    if (!tx) return res.status(404).json({ message: 'Transacción no encontrada' });
+    tx.nombre_cliente = `${tx.nombres} ${tx.apellido_paterno || ''} ${tx.apellido_materno || ''}`.trim();
+    res.json(tx);
+  } catch (e) {
+    res.status(500).json({ message: 'Error obteniendo transacción' });
+  }
+});
+
+// Descargar PDF de una transacción (depósito/retiro)
+router.get('/transacciones/:transId/pdf', authGuard, async (req, res) => {
+  const transId = Number(req.params.transId);
+  if (!Number.isFinite(transId)) return res.status(400).json({ message: 'ID inválido' });
+  try {
+    const [rows] = await pool.query(`
+      SELECT t.*, c.numero_cuenta, cl.nombres, cl.apellido_paterno, cl.apellido_materno
+      FROM transacciones t
+      JOIN cuentas c ON t.cuenta_id = c.id
+      JOIN clientes cl ON c.cliente_id = cl.id
+      WHERE t.id = ? LIMIT 1
+    `, [transId]);
+    const tx: any = (rows as any[])[0];
+    if (!tx) return res.status(404).json({ message: 'Transacción no encontrada' });
+    const pdf = await generateComprobanteMovimientoPdf({
+      tipo: tx.tipo === 'DEPOSITO' ? 'Depósito' : (tx.tipo === 'RETIRO' ? 'Retiro' : tx.tipo),
+      monto: Number(tx.monto || 0),
+      concepto: tx.concepto || null,
+      numeroCuenta: tx.numero_cuenta,
+      nombreCliente: `${tx.nombres} ${tx.apellido_paterno || ''} ${tx.apellido_materno || ''}`.trim(),
+      referencia: tx.id,
+      fecha: new Date(tx.fecha || Date.now())
+    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=comprobante-${tx.tipo?.toLowerCase() || 'movimiento'}-${transId}.pdf`);
+    res.send(pdf);
+  } catch (e) {
+    res.status(500).json({ message: 'Error generando PDF' });
+  }
 });
 
 router.post('/', authGuard, async (req, res) => {
@@ -72,10 +145,53 @@ router.post('/:id/deposito', authGuard, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await conn.execute('UPDATE cuentas SET saldo = saldo + ? WHERE id = ?', [m, id]);
-    await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [id, 'DEPOSITO', m, concepto || 'Depósito']);
+    
+    // Obtener datos de cuenta y cliente antes de actualizar
+    const [cuentaRows] = await conn.query(`
+      SELECT c.numero_cuenta, c.saldo, cl.nombres, cl.apellido_paterno, cl.email 
+      FROM cuentas c 
+      JOIN clientes cl ON c.cliente_id = cl.id 
+      WHERE c.id = ?
+    `, [id]);
+    const cuenta = (cuentaRows as any[])[0];
+    
+  await conn.execute('UPDATE cuentas SET saldo = saldo + ? WHERE id = ?', [m, id]);
+  const [ins] = await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [id, 'DEPOSITO', m, concepto || 'Depósito']);
+  const transaccionId = (ins as any).insertId;
     await conn.commit();
-    res.json({ ok: true });
+    
+    // Enviar notificación por email
+    if (cuenta?.email) {
+      const nuevoSaldo = Number(cuenta.saldo) + m;
+      const comprobante = renderComprobanteMovimiento({
+        tipo: 'Depósito',
+        monto: m,
+        concepto: concepto || 'Depósito',
+        numeroCuenta: cuenta.numero_cuenta,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(),
+        referencia: transaccionId,
+        fecha: new Date()
+      });
+      // Generar PDF
+      let pdf: Buffer | undefined;
+      try { pdf = await generateComprobanteMovimientoPdf({
+        tipo: 'Depósito', monto: m, concepto: concepto || 'Depósito', numeroCuenta: cuenta.numero_cuenta,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(), referencia: transaccionId, fecha: new Date()
+      }); } catch (err) { console.warn('No se pudo generar PDF de depósito:', (err as any)?.message || err); }
+      enviarNotificacionMovimiento({
+        emailCliente: cuenta.email,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(),
+        numeroCuenta: cuenta.numero_cuenta,
+        tipoMovimiento: 'DEPÓSITO',
+        monto: m,
+        saldoActual: nuevoSaldo,
+        concepto: concepto || 'Depósito',
+        comprobanteHtml: comprobante,
+        comprobantePdf: pdf
+      }).catch(err => console.error('Error enviando email:', err));
+    }
+    
+    res.json({ ok: true, transaccion_id: transaccionId });
   } catch (e) {
     await conn.rollback();
     res.status(500).json({ message: 'Error en depósito' });
@@ -92,16 +208,58 @@ router.post('/:id/retiro', authGuard, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const [rows] = await conn.query('SELECT saldo FROM cuentas WHERE id = ? FOR UPDATE', [id]);
-    const saldo = (rows as any[])[0]?.saldo ?? 0;
+    
+    // Obtener datos de cuenta y cliente
+    const [cuentaRows] = await conn.query(`
+      SELECT c.numero_cuenta, c.saldo, cl.nombres, cl.apellido_paterno, cl.email 
+      FROM cuentas c 
+      JOIN clientes cl ON c.cliente_id = cl.id 
+      WHERE c.id = ? FOR UPDATE
+    `, [id]);
+    const cuenta = (cuentaRows as any[])[0];
+    const saldo = cuenta?.saldo ?? 0;
+    
     if (saldo < m) {
       await conn.rollback();
       return res.status(400).json({ message: 'Saldo insuficiente' });
     }
-    await conn.execute('UPDATE cuentas SET saldo = saldo - ? WHERE id = ?', [m, id]);
-    await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [id, 'RETIRO', m, concepto || 'Retiro']);
+    
+  await conn.execute('UPDATE cuentas SET saldo = saldo - ? WHERE id = ?', [m, id]);
+  const [ins] = await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [id, 'RETIRO', m, concepto || 'Retiro']);
+  const transaccionId = (ins as any).insertId;
     await conn.commit();
-    res.json({ ok: true });
+    
+    // Enviar notificación por email
+    if (cuenta?.email) {
+      const nuevoSaldo = Number(saldo) - m;
+      const comprobante = renderComprobanteMovimiento({
+        tipo: 'Retiro',
+        monto: m,
+        concepto: concepto || 'Retiro',
+        numeroCuenta: cuenta.numero_cuenta,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(),
+        referencia: transaccionId,
+        fecha: new Date()
+      });
+      let pdf: Buffer | undefined;
+      try { pdf = await generateComprobanteMovimientoPdf({
+        tipo: 'Retiro', monto: m, concepto: concepto || 'Retiro', numeroCuenta: cuenta.numero_cuenta,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(), referencia: transaccionId, fecha: new Date()
+      }); } catch (err) { console.warn('No se pudo generar PDF de retiro:', (err as any)?.message || err); }
+      enviarNotificacionMovimiento({
+        emailCliente: cuenta.email,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(),
+        numeroCuenta: cuenta.numero_cuenta,
+        tipoMovimiento: 'RETIRO',
+        monto: m,
+        saldoActual: nuevoSaldo,
+        concepto: concepto || 'Retiro',
+        comprobanteHtml: comprobante,
+        comprobantePdf: pdf
+      }).catch(err => console.error('Error enviando email:', err));
+    }
+    
+    res.json({ ok: true, transaccion_id: transaccionId });
   } catch (e) {
     await conn.rollback();
     res.status(500).json({ message: 'Error en retiro' });
@@ -117,14 +275,65 @@ router.post('/transferir', authGuard, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const [r1] = await conn.query('SELECT saldo FROM cuentas WHERE id = ? FOR UPDATE', [origen_id]);
-    const saldo = (r1 as any[])[0]?.saldo ?? 0;
-    if (saldo < m) { await conn.rollback(); return res.status(400).json({ message: 'Saldo insuficiente' }); }
+    
+    // Obtener datos de cuenta origen
+    const [origenRows] = await conn.query(`
+      SELECT c.numero_cuenta, c.saldo, cl.nombres, cl.apellido_paterno, cl.email 
+      FROM cuentas c 
+      JOIN clientes cl ON c.cliente_id = cl.id 
+      WHERE c.id = ? FOR UPDATE
+    `, [origen_id]);
+    const cuentaOrigen = (origenRows as any[])[0];
+    const saldoOrigen = cuentaOrigen?.saldo ?? 0;
+    
+    if (saldoOrigen < m) { 
+      await conn.rollback(); 
+      return res.status(400).json({ message: 'Saldo insuficiente' }); 
+    }
+    
+    // Obtener datos de cuenta destino
+    const [destinoRows] = await conn.query(`
+      SELECT c.numero_cuenta, c.saldo, cl.nombres, cl.apellido_paterno, cl.email 
+      FROM cuentas c 
+      JOIN clientes cl ON c.cliente_id = cl.id 
+      WHERE c.id = ? FOR UPDATE
+    `, [destino_id]);
+    const cuentaDestino = (destinoRows as any[])[0];
+    const saldoDestino = cuentaDestino?.saldo ?? 0;
+    
     await conn.execute('UPDATE cuentas SET saldo = saldo - ? WHERE id = ?', [m, origen_id]);
     await conn.execute('UPDATE cuentas SET saldo = saldo + ? WHERE id = ?', [m, destino_id]);
     await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [origen_id, 'TRANSFERENCIA_SALIDA', m, concepto || 'Transferencia a cuenta ' + destino_id]);
     await conn.execute('INSERT INTO transacciones (cuenta_id, tipo, monto, concepto) VALUES (?, ?, ?, ?)', [destino_id, 'TRANSFERENCIA_ENTRADA', m, concepto || 'Transferencia de cuenta ' + origen_id]);
     await conn.commit();
+    
+    // Enviar notificaciones por email a ambas cuentas
+    if (cuentaOrigen?.email) {
+      const nuevoSaldoOrigen = Number(saldoOrigen) - m;
+      enviarNotificacionMovimiento({
+        emailCliente: cuentaOrigen.email,
+        nombreCliente: `${cuentaOrigen.nombres} ${cuentaOrigen.apellido_paterno || ''}`.trim(),
+        numeroCuenta: cuentaOrigen.numero_cuenta,
+        tipoMovimiento: 'TRANSFERENCIA_ENVIADA',
+        monto: m,
+        saldoActual: nuevoSaldoOrigen,
+        concepto: concepto || `Transferencia a cuenta ${cuentaDestino?.numero_cuenta || destino_id}`
+      }).catch(err => console.error('Error enviando email origen:', err));
+    }
+    
+    if (cuentaDestino?.email) {
+      const nuevoSaldoDestino = Number(saldoDestino) + m;
+      enviarNotificacionMovimiento({
+        emailCliente: cuentaDestino.email,
+        nombreCliente: `${cuentaDestino.nombres} ${cuentaDestino.apellido_paterno || ''}`.trim(),
+        numeroCuenta: cuentaDestino.numero_cuenta,
+        tipoMovimiento: 'TRANSFERENCIA_RECIBIDA',
+        monto: m,
+        saldoActual: nuevoSaldoDestino,
+        concepto: concepto || `Transferencia de cuenta ${cuentaOrigen?.numero_cuenta || origen_id}`
+      }).catch(err => console.error('Error enviando email destino:', err));
+    }
+    
     res.json({ ok: true });
   } catch (e) {
     await conn.rollback();
@@ -134,20 +343,53 @@ router.post('/transferir', authGuard, async (req, res) => {
   }
 });
 
+// Cambiar estatus (ACTIVA/SUSPENDIDA/BLOQUEADA). Para CANCELADA usar /:id/cancelar
+router.put('/:id/estatus', authGuard, async (req, res) => {
+  const id = Number(req.params.id);
+  const { estatus } = req.body || {};
+  const allowed = new Set(['ACTIVA', 'SUSPENDIDA', 'BLOQUEADA']);
+  if (!allowed.has(estatus)) return res.status(400).json({ message: 'Estatus no permitido' });
+  await pool.execute('UPDATE cuentas SET estatus = ? WHERE id = ?', [estatus, id]);
+  res.json({ ok: true });
+});
+
 router.post('/:id/cancelar', authGuard, async (req, res) => {
   const id = Number(req.params.id);
   const { motivo_cancelacion, usuario_cancelacion } = req.body || {};
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const [rows] = await conn.query('SELECT saldo FROM cuentas WHERE id = ? FOR UPDATE', [id]);
-    const saldo = (rows as any[])[0]?.saldo ?? 0;
+    
+    // Obtener datos de cuenta y cliente
+    const [cuentaRows] = await conn.query(`
+      SELECT c.numero_cuenta, c.saldo, cl.nombres, cl.apellido_paterno, cl.email 
+      FROM cuentas c 
+      JOIN clientes cl ON c.cliente_id = cl.id 
+      WHERE c.id = ? FOR UPDATE
+    `, [id]);
+    const cuenta = (cuentaRows as any[])[0];
+    const saldo = cuenta?.saldo ?? 0;
+    
     await conn.execute('UPDATE cuentas SET estatus = ? WHERE id = ?', ['CANCELADA', id]);
     await conn.execute(
       'INSERT INTO cancelaciones_cuentas (cuenta_id, fecha_cancelacion, motivo_cancelacion, saldo_final, usuario_cancelacion) VALUES (?, NOW(), ?, ?, ?)',
       [id, motivo_cancelacion || '', saldo, usuario_cancelacion || 'sistema']
     );
     await conn.commit();
+    
+    // Enviar notificación por email
+    if (cuenta?.email) {
+      enviarNotificacionMovimiento({
+        emailCliente: cuenta.email,
+        nombreCliente: `${cuenta.nombres} ${cuenta.apellido_paterno || ''}`.trim(),
+        numeroCuenta: cuenta.numero_cuenta,
+        tipoMovimiento: 'CANCELACION',
+        monto: 0,
+        saldoActual: saldo,
+        concepto: motivo_cancelacion || 'Cancelación de cuenta'
+      }).catch(err => console.error('Error enviando email:', err));
+    }
+    
     res.json({ ok: true, saldo_final: saldo });
   } catch (e) {
     await conn.rollback();

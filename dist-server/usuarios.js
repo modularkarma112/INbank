@@ -37,5 +37,22 @@ router.delete('/:id', middleware_1.authGuard, async (req, res) => {
     await db_1.pool.execute('DELETE FROM usuarios WHERE id = ?', [id]);
     res.json({ ok: true });
 });
+// Cambiar contraseña de un usuario
+router.put('/:id/password', middleware_1.authGuard, async (req, res) => {
+    const id = Number(req.params.id);
+    const { contrasena } = req.body || {};
+    if (!id || !contrasena)
+        return res.status(400).json({ message: 'contrasena requerida' });
+    if (String(contrasena).length < 6)
+        return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    try {
+        const hash = await bcryptjs_1.default.hash(String(contrasena), 10);
+        const [result] = await db_1.pool.execute('UPDATE usuarios SET contrasena = ? WHERE id = ?', [hash, id]);
+        res.json({ ok: true });
+    }
+    catch (e) {
+        res.status(500).json({ message: 'Error actualizando contraseña' });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=usuarios.js.map

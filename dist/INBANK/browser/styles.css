@@ -1,0 +1,40 @@
+/* src/styles.css */
+:root {
+  --bg:linear-gradient(
+      180deg,#f4f6f9,#eef1f5 40%,#e9edf3);
+  --brand:#0B5EA8;
+  --primary:#0EA5E9;
+  --ui-blue:#0A66C2;
+  --text:#111827;
+  --muted:#6B7280;
+  --border:#E5E7EB;
+  --success:#10B981;
+  --success-bg:#ECFDF5;
+  --info:#3B82F6;
+  --info-bg:#EFF6FF;
+  --error:#EF4444;
+  --error-bg:#FEF2F2;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+* {
+  box-sizing: border-box;
+}
+
+/* angular:styles/global:styles */
+/*# sourceMappingURL=styles.css.map */

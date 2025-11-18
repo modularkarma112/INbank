@@ -20,8 +20,10 @@ export const routes: Routes = [
 	{ path: 'prestamos-solicitud', canActivate: [canActivateAuth], loadComponent: () => import('./pages/prestamos-solicitud/prestamos-solicitud.component').then(m => m.PrestamosSolicitudComponent) },
 	{ path: 'transferencias', canActivate: [canActivateAuth], loadComponent: () => import('./pages/transferencias/transferencias.component').then(m => m.TransferenciasComponent) },
 	{ path: 'comprobante-transferencia/:id', canActivate: [canActivateAuth], loadComponent: () => import('./pages/comprobante-transferencia/comprobante-transferencia.component').then(m => m.ComprobanteTransferenciaComponent) },
+	{ path: 'comprobante-movimiento/:id', canActivate: [canActivateAuth], loadComponent: () => import('./pages/comprobante-movimiento/comprobante-movimiento.component').then(m => m.ComprobanteMovimientoComponent) },
 	{ path: 'usuarios/alta', canActivate: [canActivateAuth], loadComponent: () => import('./pages/usuarios-alta/usuarios-alta.component').then(m => m.UsuariosAltaComponent) },
 	{ path: 'clientes', canActivate: [canActivateAuth], loadComponent: () => import('./pages/clientes/clientes.component').then(m => m.ClientesComponent) },
+	{ path: 'clientes/:id', canActivate: [canActivateAuth], loadComponent: () => import('./pages/cliente-perfil/cliente-perfil.component').then(m => m.ClientePerfilComponent) },
 	{ path: 'cuentas', canActivate: [canActivateAuth], loadComponent: () => import('./pages/cuentas/cuentas.component').then(m => m.CuentasComponent) },
 	{ path: 'prestamos', canActivate: [canActivateAuth], loadComponent: () => import('./pages/prestamos/prestamos.component').then(m => m.PrestamosComponent) },
 	{ path: 'cobranzas', canActivate: [canActivateAuth], loadComponent: () => import('./pages/cobranzas/cobranzas.component').then(m => m.CobranzasComponent) },
@@ -30,8 +32,6 @@ export const routes: Routes = [
 	{ path: 'usuarios-&-roles', canActivate: [canActivateAuth], loadComponent: () => import('./pages/usuarios-roles/usuarios-roles.component').then(m => m.UsuariosRolesComponent) },
 	{ path: 'estado-cuenta', canActivate: [canActivateAuth], loadComponent: () => import('./pages/estado-cuenta/estado-cuenta.component').then(m => m.EstadoCuentaComponent) },
 	{ path: 'reporte-transacciones', canActivate: [canActivateAuth], loadComponent: () => import('./pages/reporte-transacciones/reporte-transacciones.component').then(m => m.ReporteTransaccionesComponent) },
-	{ path: 'centro-ayuda', canActivate: [canActivateAuth], loadComponent: () => import('./pages/centro-ayuda/centro-ayuda.component').then(m => m.CentroAyudaComponent) },
-	{ path: 'estado-sistema', canActivate: [canActivateAuth], loadComponent: () => import('./pages/estado-sistema/estado-sistema.component').then(m => m.EstadoSistemaComponent) },
 	{ path: '**', redirectTo: '/dashboard' }
 ];
 

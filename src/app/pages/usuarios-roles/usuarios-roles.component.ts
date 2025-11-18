@@ -38,6 +38,7 @@ import { Router, RouterLink } from '@angular/router';
 						<td>{{u.rol}}</td>
 						<td>{{u.telefono || '-'}}</td>
 						<td>
+							<button class="btn btn-sm btn-outline-primary me-2" (click)="cambiarPassword(u)">Cambiar contraseña</button>
 							<button class="btn btn-sm btn-outline-danger" (click)="eliminar(u)">Eliminar</button>
 						</td>
 					</tr>
@@ -52,6 +53,18 @@ export class UsuariosRolesComponent{
 	usuarios = signal<any[]>([]);
 	constructor(private http: HttpClient, private router: Router){ this.cargar(); }
 	cargar(){ this.http.get(`${this.api}/api/usuarios`).subscribe((r:any)=> this.usuarios.set(r||[])); }
+	
+		cambiarPassword(u:any){
+			const p1 = prompt(`Nueva contraseña para ${u.usuario} (mín. 6 caracteres):`);
+			if (!p1) return;
+			if (p1.length < 6) { alert('La contraseña debe tener al menos 6 caracteres'); return; }
+			const p2 = prompt('Confirma la contraseña:');
+			if (p1 !== p2) { alert('Las contraseñas no coinciden'); return; }
+			this.http.put(`${this.api}/api/usuarios/${u.id}/password`, { contrasena: p1 }).subscribe({
+				next: ()=> { alert('Contraseña actualizada'); },
+				error: (e)=> alert(e?.error?.message || 'Error actualizando contraseña')
+			});
+		}
 	eliminar(u:any){
 		if(!confirm(`¿Eliminar al usuario ${u.usuario}?`)) return;
 		this.http.delete(`${this.api}/api/usuarios/${u.id}`).subscribe({

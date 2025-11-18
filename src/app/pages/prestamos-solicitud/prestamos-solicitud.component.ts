@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,169 +13,88 @@ import { Router } from '@angular/router';
 })
 export class PrestamosSolicitudComponent {
 
-  // Datos formulario
-  solicitante = {
-    nombres: '',
-    apellidos: '',
-    rfc: '',
-    curp: '',
-    email: '',
-    telefono: '',
-    estado: '',
-    ciudad: '',
-    direccion: '',
-    codigoPostal: ''
-  };
+  constructor(private router: Router, private http: HttpClient) {}
 
-  laboral = {
-    ocupacion: '',
-    empleador: '',
-    anosTraboajo: null,
-    ingresosMensuales: '',
-    otrosIngresos: '',
-    gastosMensuales: ''
-  };
+  // Búsqueda y selección de cliente
+  buscar = { id: '', rfc: '', curp: '', email: '', telefono: '' };
+  resultados: any[] = [];
+  seleccion: any | null = null;
+  buscarNombreLibre: string = '';
 
-  prestamo = {
-    tipo: '',
-    monto: '',
-    plazo: ''
-  };
+  // Datos del préstamo
+  tipo: string = '';
+  monto: number | null = null;
+  plazoMeses: number | null = null;
 
-  // Tipos préstamo
-  tiposPrestamo = [
-    { value: 'personal', label: 'Préstamo Personal' },
-    { value: 'hipotecario', label: 'Crédito Hipotecario' },
-    { value: 'automotriz', label: 'Crédito Automotriz' },
-    { value: 'nomina', label: 'Préstamo de Nómina' },
-    { value: 'pyme', label: 'Crédito PyME' }
-  ];
+  // Reglas del negocio (coherentes con el ejemplo dado)
+  readonly tasaMensual = 0.033333; // 3.333%
+  readonly penalizacionDiaria = 0.004; // 0.4%
 
-  // Montos (MXN)
-  montosSugeridos = [
-    { value: '50000', label: '$50,000 MXN' },
-    { value: '100000', label: '$100,000 MXN' },
-    { value: '250000', label: '$250,000 MXN' },
-    { value: '500000', label: '$500,000 MXN' },
-    { value: '1000000', label: '$1,000,000 MXN' }
-  ];
-
-  // Plazos
-  plazos = [
-    { value: '12', label: '12 meses' },
-    { value: '24', label: '24 meses' },
-    { value: '36', label: '36 meses' },
-    { value: '48', label: '48 meses' },
-    { value: '60', label: '60 meses' }
-  ];
-
-  // Estados
-  estados = [
-    'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Coahuila',
-    'Colima', 'Chiapas', 'Chihuahua', 'Ciudad de México', 'Durango', 'Guanajuato',
-    'Guerrero', 'Hidalgo', 'Jalisco', 'México', 'Michoacán', 'Morelos', 'Nayarit',
-    'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí',
-    'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
-  ];
-
-  // Ciudades x estado
-  ciudadesPorEstado: { [key: string]: string[] } = {
-    'Aguascalientes': ['Aguascalientes', 'Calvillo', 'Jesús María', 'Pabellón de Arteaga'],
-    'Baja California': ['Tijuana', 'Mexicali', 'Ensenada', 'Rosarito', 'Tecate'],
-    'Baja California Sur': ['La Paz', 'Los Cabos', 'Cabo San Lucas', 'San José del Cabo'],
-    'Campeche': ['Campeche', 'Ciudad del Carmen', 'Champotón', 'Escárcega'],
-    'Coahuila': ['Saltillo', 'Torreón', 'Monclova', 'Piedras Negras', 'Acuña'],
-    'Colima': ['Colima', 'Manzanillo', 'Villa de Álvarez', 'Tecomán'],
-    'Chiapas': ['Tuxtla Gutiérrez', 'San Cristóbal de las Casas', 'Tapachula', 'Comitán'],
-    'Chihuahua': ['Chihuahua', 'Ciudad Juárez', 'Delicias', 'Parral', 'Cuauhtémoc'],
-    'Ciudad de México': ['Álvaro Obregón', 'Azcapotzalco', 'Benito Juárez', 'Coyoacán', 'Cuajimalpa', 'Cuauhtémoc', 'Gustavo A. Madero', 'Iztacalco', 'Iztapalapa', 'Magdalena Contreras', 'Miguel Hidalgo', 'Milpa Alta', 'Tláhuac', 'Tlalpan', 'Venustiano Carranza', 'Xochimilco'],
-    'Durango': ['Durango', 'Gómez Palacio', 'Lerdo', 'Santiago Papasquiaro'],
-    'Guanajuato': ['León', 'Irapuato', 'Celaya', 'Salamanca', 'Guanajuato', 'Pénjamo'],
-    'Guerrero': ['Acapulco', 'Chilpancingo', 'Iguala', 'Taxco', 'Zihuatanejo'],
-    'Hidalgo': ['Pachuca', 'Tulancingo', 'Tizayuca', 'Huejutla'],
-    'Jalisco': ['Guadalajara', 'Zapopan', 'Tlaquepaque', 'Tonalá', 'Puerto Vallarta', 'Tlajomulco'],
-    'México': ['Toluca', 'Ecatepec', 'Naucalpan', 'Nezahualcóyotl', 'Tlalnepantla', 'Chimalhuacán'],
-    'Michoacán': ['Morelia', 'Uruapan', 'Zamora', 'Lázaro Cárdenas', 'Apatzingán'],
-    'Morelos': ['Cuernavaca', 'Jiutepec', 'Temixco', 'Cuautla', 'Yautepec'],
-    'Nayarit': ['Tepic', 'Bahía de Banderas', 'Compostela', 'Santiago Ixcuintla'],
-    'Nuevo León': ['Monterrey', 'Guadalupe', 'San Nicolás de los Garza', 'Apodaca', 'Santa Catarina'],
-    'Oaxaca': ['Oaxaca de Juárez', 'Salina Cruz', 'Tuxtepec', 'Juchitán', 'Huajuapan'],
-    'Puebla': ['Puebla', 'Tehuacán', 'San Martín Texmelucan', 'Atlixco', 'Cholula'],
-    'Querétaro': ['Querétaro', 'San Juan del Río', 'Corregidora', 'El Marqués'],
-    'Quintana Roo': ['Cancún', 'Chetumal', 'Playa del Carmen', 'Cozumel', 'Tulum'],
-    'San Luis Potosí': ['San Luis Potosí', 'Soledad de Graciano Sánchez', 'Ciudad Valles', 'Rioverde'],
-    'Sinaloa': ['Culiacán', 'Mazatlán', 'Los Mochis', 'Guasave', 'Guamúchil'],
-    'Sonora': ['Hermosillo', 'Ciudad Obregón', 'Nogales', 'San Luis Río Colorado', 'Navojoa'],
-    'Tabasco': ['Villahermosa', 'Cárdenas', 'Comalcalco', 'Huimanguillo'],
-    'Tamaulipas': ['Reynosa', 'Matamoros', 'Nuevo Laredo', 'Tampico', 'Victoria'],
-    'Tlaxcala': ['Tlaxcala', 'Apizaco', 'Huamantla', 'San Pablo del Monte'],
-    'Veracruz': ['Veracruz', 'Xalapa', 'Coatzacoalcos', 'Córdoba', 'Orizaba', 'Poza Rica'],
-    'Yucatán': ['Mérida', 'Kanasín', 'Umán', 'Progreso', 'Valladolid'],
-    'Zacatecas': ['Zacatecas', 'Fresnillo', 'Guadalupe', 'Jerez', 'Río Grande']
-  };
-
-  ciudadesDisponibles: string[] = [];
-
-  constructor(private router: Router) {}
-
-  // Volver al dashboard
-  goBack() {
-    this.router.navigate(['/dashboard']);
+  get totalBase(): number {
+    if (!this.monto || !this.plazoMeses) return 0;
+    const t = this.monto * (1 + this.tasaMensual * this.plazoMeses);
+    return Math.round(t * 100) / 100;
   }
 
-  // Cancelar
-  onCancel() {
-    this.goBack();
+  get cuotaMensual(): number {
+    if (!this.plazoMeses) return 0;
+    return Math.round((this.totalBase / this.plazoMeses) * 100) / 100;
   }
 
-  // Cambio de estado
-  onEstadoChange(estado: string) {
-    if (estado && this.ciudadesPorEstado[estado]) {
-      this.ciudadesDisponibles = this.ciudadesPorEstado[estado];
-      // Limpia ciudad
-      this.solicitante.ciudad = '';
-    } else {
-      this.ciudadesDisponibles = [];
+  ejemploTotalCon30DiasMora(): number {
+    if (!this.monto || !this.plazoMeses) return 0;
+    const t = this.totalBase + this.monto * this.penalizacionDiaria * 30; // ~+12% del principal
+    return Math.round(t * 100) / 100;
+  }
+
+  goBack() { this.router.navigate(['/dashboard']); }
+  onCancel() { this.goBack(); }
+
+  // Buscar cliente
+  buscarCliente() {
+    const params: any = {};
+    for (const k of Object.keys(this.buscar) as (keyof typeof this.buscar)[]) {
+      const v = this.buscar[k]; if (v) params[k] = v;
     }
+    // Permitir búsqueda libre con q (nombre, email, etc.) si no se especificó campo específico
+    if (Object.keys(params).length === 0 && this.buscarNombreLibre?.trim()) {
+      params.q = this.buscarNombreLibre.trim();
+    }
+    if (!Object.keys(params).length) { alert('Ingrese al menos un criterio'); return; }
+    this.http.get<any[]>('/api/clientes/buscar', { params }).subscribe({
+      next: rows => {
+        this.resultados = rows || [];
+        this.seleccion = this.resultados.length === 1 ? this.resultados[0] : null;
+      },
+      error: err => { console.error(err); alert('Error buscando cliente'); }
+    });
   }
+
+  seleccionarCliente(c: any) { this.seleccion = c; }
 
   // Enviar solicitud
   onSubmit() {
-    if (this.isFormValid()) {
-      console.log('Solicitud de préstamo:', {
-        solicitante: this.solicitante,
-        laboral: this.laboral,
-        prestamo: this.prestamo
-      });
-      
-      alert('Solicitud enviada exitosamente. Un ejecutivo se pondrá en contacto con usted.');
-      this.goBack();
-    } else {
-      alert('Por favor, complete todos los campos requeridos.');
-    }
-  }
+    if (!this.seleccion?.id) { alert('Seleccione un cliente'); return; }
+    if (!this.tipo) { alert('Seleccione tipo de préstamo'); return; }
+    if (!this.monto || !this.plazoMeses) { alert('Capture monto y plazo'); return; }
 
-  // Check validación
-  private isFormValid(): boolean {
-    return !!(
-      this.solicitante.nombres &&
-      this.solicitante.apellidos &&
-      this.solicitante.rfc &&
-      this.solicitante.curp &&
-      this.solicitante.email &&
-      this.solicitante.telefono &&
-      this.solicitante.estado &&
-      this.solicitante.ciudad &&
-      this.solicitante.direccion &&
-      this.solicitante.codigoPostal &&
-      this.laboral.ocupacion &&
-      this.laboral.empleador &&
-      this.laboral.anosTraboajo &&
-      this.laboral.ingresosMensuales &&
-      this.laboral.gastosMensuales &&
-      this.prestamo.tipo &&
-      this.prestamo.monto &&
-      this.prestamo.plazo
-    );
+    const payload = {
+      cliente_id: this.seleccion.id,
+      tipo_prestamo: this.tipo,
+      monto: this.monto,
+      plazo_meses: this.plazoMeses
+    };
+
+    this.http.post<{ id: number }>("/api/prestamos", payload).subscribe({
+      next: r => {
+        const id = r?.id;
+        alert(`Solicitud #${id} enviada y en revisión. Se notificó por correo si está configurado.`);
+        this.router.navigate(['/clientes', this.seleccion.id]);
+      },
+      error: err => {
+        console.error(err);
+        alert(err?.error?.message || 'No se pudo crear la solicitud');
+      }
+    });
   }
 }

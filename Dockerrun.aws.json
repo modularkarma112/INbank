@@ -1,0 +1,15 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "node:20-alpine",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 4000
+    }
+  ],
+  "Volumes": [],
+  "Logging": "/var/log/inbank",
+  "Command": "npm start"
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/usuarios-alta/usuarios-alta.component.css"],
+  "sourcesContent": [".container { max-width: 960px; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAY,aAAW;AAAO;",
+  "names": []
+}

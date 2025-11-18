@@ -1,0 +1,45 @@
+<div class="comprobante-container" *ngIf="!cargando() && movimiento()">
+  <div class="comprobante">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">🏦</div>
+        <div class="logo-text">INBank</div>
+      </div>
+      <div class="titulo">
+        <h1>COMPROBANTE DE {{ movimiento().tipo }}</h1>
+        <p class="autorizacion">Referencia: #{{ movimiento().id }} • {{ movimiento().fecha | date:'dd/MM/yyyy, HH:mm' }} (hora de CDMX)</p>
+      </div>
+    </div>
+
+    <!-- Monto / Concepto / Cuenta -->
+    <div class="seccion">
+      <div class="fila">
+        <div class="campo">Monto</div>
+        <div class="valor">${{ movimiento().monto | number:'1.2-2' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Concepto</div>
+        <div class="valor">{{ movimiento().concepto || 'Sin concepto' }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Titular</div>
+        <div class="valor">{{ movimiento().nombre_cliente }}</div>
+      </div>
+      <div class="fila">
+        <div class="campo">Número de cuenta</div>
+        <div class="valor">{{ movimiento().numero_cuenta }}</div>
+      </div>
+    </div>
+
+    <div class="acciones">
+      <button class="btn-volver" (click)="volver()">VOLVER</button>
+      <button class="btn-imprimir" (click)="imprimir()">IMPRIMIR</button>
+      <button class="btn-imprimir" (click)="descargarPdf()">DESCARGAR PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="cargando()">
+  <p>Cargando comprobante...</p>
+</div>

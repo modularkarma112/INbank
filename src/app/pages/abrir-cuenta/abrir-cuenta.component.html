@@ -138,7 +138,6 @@
           <select
             id="city"
             formControlName="city"
-            [disabled]="!accountForm.get('estado')?.value"
             [class.error]="getFieldError('city')"
           >
             <option value="">{{!accountForm.get('estado')?.value ? 'Primero selecciona un estado' : 'Selecciona tu ciudad'}}</option>
